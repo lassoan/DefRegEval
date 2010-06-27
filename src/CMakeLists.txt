@@ -1,7 +1,29 @@
+ADD_LIBRARY(dreIO
+	IO/vtkLsDynaBinaryPlotReader.cxx 
+	IO/vtkMeditMeshReader.cxx 
+	IO/vtkNetgenMeshReader.cxx 
+	IO/vtkSMeshWriter.cxx
+	IO/vtkFEBioWriter.cxx 
+	)
+
+##########################
+
+ADD_EXECUTABLE(CreateShapeModel 
+  CreateShapeModel.cxx
+  )
+  
+TARGET_LINK_LIBRARIES(CreateShapeModel 
+  ITKCommon 
+  ITKIO 
+  ITKBasicFilters 
+  ITKAlgorithms 
+  vtksys
+  )
+
+##########################
+
 ADD_EXECUTABLE(GenerateShapeImage 
   GenerateShapeImage.cxx
-  Random.cxx 
-  Random.h  
   )
   
 TARGET_LINK_LIBRARIES(GenerateShapeImage 
@@ -16,8 +38,6 @@ TARGET_LINK_LIBRARIES(GenerateShapeImage
 
 ADD_EXECUTABLE(ExtractSurface
   ExtractSurface.cxx  
-  vtkSMeshWriter.cxx
-  vtkSMeshWriter.h
   )
   
 TARGET_LINK_LIBRARIES(ExtractSurface
@@ -26,20 +46,13 @@ TARGET_LINK_LIBRARIES(ExtractSurface
   vtksys
   vtkHybrid
   vtkImaging 
+  dreIO
   )
 
 ##########################
 
 ADD_EXECUTABLE(CreateFemModel 
   CreateFemModel.cxx
-  vtkNetgenMeshReader.cxx
-  vtkNetgenMeshReader.h
-  vtkMeditMeshReader.cxx
-  vtkMeditMeshReader.h  
-  vtkFEBioWriter.cxx
-  vtkFEBioWriter.h
-  Random.cxx 
-  Random.h  
   )
   
 TARGET_LINK_LIBRARIES(CreateFemModel 
@@ -50,6 +63,7 @@ TARGET_LINK_LIBRARIES(CreateFemModel
   vtksys 
   vtkIO  
   vtkGraphics
+  dreIO
   )
 
 ##########################
@@ -70,8 +84,6 @@ TARGET_LINK_LIBRARIES(AddImageSegmentationError
 
 ADD_EXECUTABLE(GetDeformedImage 
   GetDeformedImage.cxx
-  vtkLsDynaBinaryPlotReader.cxx
-  vtkLsDynaBinaryPlotReader.h
   )
   
 TARGET_LINK_LIBRARIES(GetDeformedImage  
@@ -83,15 +95,14 @@ TARGET_LINK_LIBRARIES(GetDeformedImage
   ITKCommon 
   ITKIO 
   ITKBasicFilters 
-  ITKAlgorithms 
+  ITKAlgorithms
+  dreIO 
   )
   
 ##########################
 
 ADD_EXECUTABLE(RegisterImages 
   RegisterImages.cxx
-  Random.cxx 
-  Random.h  
   )
   
 TARGET_LINK_LIBRARIES(RegisterImages 

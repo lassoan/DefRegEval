@@ -15,7 +15,7 @@
 #include "vtkSmartPointer.h"
 #include "vtkXMLUnstructuredGridWriter.h" 
 #include "vtkUnstructuredGridWriter.h"
-#include "vtkFEBioWriter.h" 
+#include "IO/vtkFEBioWriter.h" 
 #include "vtkMath.h"
 #include "vtkCharArray.h"
 #include "vtkDoubleArray.h"
@@ -29,8 +29,8 @@
 #include "vtkSTLReader.h"
 
 
-#include "vtkNetgenMeshReader.h"
-#include "vtkMeditMeshReader.h"
+#include "IO/vtkNetgenMeshReader.h"
+#include "IO/vtkMeditMeshReader.h"
 #include "Random.h"
 
 typedef float  PixelType;
