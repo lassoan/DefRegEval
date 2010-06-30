@@ -38,6 +38,12 @@ public:
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);
 
+  vtkSetStringMacro(ArrayNameMaterial);
+  vtkGetStringMacro(ArrayNameMaterial);
+
+  vtkSetStringMacro(ArrayNameOnSurface);
+  vtkGetStringMacro(ArrayNameOnSurface);
+
 protected:
 
   bool ReadHeader(ifstream &inputFile);
@@ -52,6 +58,9 @@ protected:
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
   char *FileName;
+
+  char* ArrayNameMaterial;
+  char* ArrayNameOnSurface;
 
 private:
 

@@ -30,16 +30,15 @@
 # include <io.h> /* unlink */
 #endif
 
-static const char* ARRAY_NAME_MATERIAL="material";
-
 static const int SUPPORTED_DIMENSION=3;
-
 
 vtkCxxRevisionMacro(vtkSMeshWriter, "$Revision: 1.43 $");
 vtkStandardNewMacro(vtkSMeshWriter);
 
 vtkSMeshWriter::vtkSMeshWriter() 
 {
+  this->ArrayNameMaterial=NULL;
+  this->SetArrayNameMaterial("material");
 }
 
 vtkSMeshWriter::~vtkSMeshWriter() 
@@ -151,7 +150,7 @@ bool vtkSMeshWriter::WriteGeometry(ostream* fp)
   vtkIntArray* materialArray=NULL;
   if (input->GetCellData()!=NULL)
   {
-    materialArray=vtkIntArray::SafeDownCast(input->GetCellData()->GetArray(ARRAY_NAME_MATERIAL));
+    materialArray=vtkIntArray::SafeDownCast(input->GetCellData()->GetArray(this->ArrayNameMaterial));
   }
   else
   {

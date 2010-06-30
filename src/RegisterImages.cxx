@@ -1,17 +1,10 @@
-// disable warnings for sprintf
-#define _CRT_SECURE_NO_WARNINGS
-// disable warnings for std::copy
-#define _SCL_SECURE_NO_WARNINGS
+#include "DefRegEval.h"
 
 #if defined(_MSC_VER)
 #pragma warning ( disable : 4786 )
 #endif
 
-
-#include "itkImage.h"
 #include "itkCastImageFilter.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
 #include "itkLevelSetMotionRegistrationFilter.h"
 #include "itkWarpImageFilter.h"
 #include "itkImageRegistrationMethod.h"
@@ -21,13 +14,6 @@
 #include "itkImageRegistrationMethod.h"
 #include "itkMeanSquaresImageToImageMetric.h"
 #include "itkLinearInterpolateImageFunction.h"
-
-#include "vtksys/CommandLineArguments.hxx"
-
-#include "itkImageFileReader.h" 
-#include "itkImageFileWriter.h" 
-
-#include "itkImage.h"
 #include "itkResampleImageFilter.h"
 #include "itkLinearInterpolateImageFunction.h"
 
@@ -35,28 +21,19 @@
 
 #include <fstream>
 
+typedef unsigned char  ExternalImagePixelType;
+typedef itk::Image <ExternalImagePixelType, ImageDimension> OutputImageType;
 
-
-
-const     unsigned int   ImageDimension = 3;
-
-typedef float  InternalPixelType;
-typedef unsigned char  ExternalPixelType;
-
-typedef itk::Vector<InternalPixelType, ImageDimension>    VectorPixelType;
-typedef itk::Image <InternalPixelType, ImageDimension> InternalImageType;
-typedef itk::Image <ExternalPixelType, ImageDimension> OutputImageType;
-typedef itk::ImageFileReader< InternalImageType  > ImageReaderType;
+typedef itk::Vector<InternalImagePixelType, ImageDimension> VectorPixelType;
 typedef itk::Image<VectorPixelType,  ImageDimension> DeformationFieldType;
 
 //////////////////////////
 
-typedef   itk::Image< ExternalPixelType, ImageDimension >  FixedImageType;
-typedef   itk::Image< ExternalPixelType, ImageDimension >  MovingImageType;
+typedef   itk::Image< ExternalImagePixelType, ImageDimension >  FixedImageType;
+typedef   itk::Image< ExternalImagePixelType, ImageDimension >  MovingImageType;
 
 typedef   itk::ImageFileReader< FixedImageType  >  FixedReaderType;
 typedef   itk::ImageFileReader< MovingImageType >  MovingReaderType;
-
 
 typedef itk::LevelSetMotionRegistrationFilter<InternalImageType,InternalImageType,DeformationFieldType>   DeformableRegistrationFilterType;
 
@@ -64,8 +41,6 @@ typedef itk::VersorRigid3DTransformOptimizer OptimizerType;
 //typedef const OptimizerType *OptimizerPointer;
 
 //////////////////////////
-
-
 
 
 //  The following section of code implements a Command observer

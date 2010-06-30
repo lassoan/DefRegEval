@@ -33,9 +33,6 @@ PURPOSE.  See the above copyright notice for more information.
 vtkCxxRevisionMacro(vtkMeditMeshReader, "$Revision: 1.6 $");
 vtkStandardNewMacro(vtkMeditMeshReader);
 
-static const char* ARRAY_NAME_MATERIAL="material";
-static const char* ARRAY_NAME_ONSURFACE="on_surface";
-
 static const int SUPPORTED_MESHVERSION=1;
 static const int SUPPORTED_DIMENSION=3;
 static const int MAX_LINE_LENGTH=2048;
@@ -46,6 +43,13 @@ vtkMeditMeshReader::vtkMeditMeshReader()
   this->FileName = NULL;
 
   this->SetNumberOfInputPorts(0);
+
+  this->ArrayNameMaterial=NULL;
+  this->SetArrayNameMaterial("material");
+
+  this->ArrayNameOnSurface=NULL;
+  this->SetArrayNameOnSurface("on_surface");
+
 }
 
 //----------------------------------------------------------------------------
@@ -113,7 +117,7 @@ int vtkMeditMeshReader::RequestData(
   {
     int numberOfPoints=output->GetNumberOfPoints();
     vtkSmartPointer<vtkCharArray> isSurfacePointArray=vtkSmartPointer<vtkCharArray>::New();
-    isSurfacePointArray->SetName(ARRAY_NAME_ONSURFACE);
+    isSurfacePointArray->SetName(this->ArrayNameOnSurface);
     isSurfacePointArray->SetNumberOfComponents(1);  
     isSurfacePointArray->SetNumberOfTuples(numberOfPoints);  
     // Clear surface property array
@@ -262,7 +266,7 @@ bool vtkMeditMeshReader::ReadVolumeElements(ifstream &inputFile, vtkUnstructured
   output->Allocate(numberOfVolumeElements);
 
   vtkSmartPointer<vtkIntArray> materialArray=vtkSmartPointer<vtkIntArray>::New();
-  materialArray->SetName(ARRAY_NAME_MATERIAL);
+  materialArray->SetName(this->ArrayNameMaterial);
   materialArray->SetNumberOfComponents(1);
   materialArray->SetNumberOfTuples(numberOfVolumeElements);
   output->GetCellData()->AddArray(materialArray);

@@ -7,31 +7,14 @@
 #pragma warning ( disable : 4786 )
 #endif
 
+#include "DefRegEval.h"
 
-#include "itkImage.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
-
-#include "vtksys/CommandLineArguments.hxx"
-
-typedef float  PixelType;
-static const unsigned int  Dimension = 3;
-typedef itk::Image <PixelType, Dimension> InternalImageType;
 typedef itk::Image <unsigned char, 3> OutputImageType;
-typedef itk::ImageFileReader< InternalImageType  > ImageReaderType;
 
-static const int SUPPORTED_DIMENSION=3;
-
-
-#include "itkImageFileReader.h" 
-#include "itkImageFileWriter.h" 
-
-#include "itkImage.h"
 #include "itkResampleImageFilter.h"
 #include "itkLinearInterpolateImageFunction.h"
 
 #include "itkBSplineDeformableTransform.h"
-//  Software Guide : EndCodeSnippet
 
 #include <fstream>
 
@@ -115,9 +98,9 @@ int main( int argc, char * argv[] )
 
 	const     unsigned int   ImageDimension = 3;
 
-	typedef   unsigned char  PixelType;
-	typedef   itk::Image< PixelType, ImageDimension >  FixedImageType;
-	typedef   itk::Image< PixelType, ImageDimension >  MovingImageType;
+	typedef   unsigned char  charPixelType;
+	typedef   itk::Image< charPixelType, ImageDimension >  FixedImageType;
+	typedef   itk::Image< charPixelType, ImageDimension >  MovingImageType;
 
 	typedef   itk::ImageFileReader< FixedImageType  >  FixedReaderType;
 

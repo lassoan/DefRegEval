@@ -1,9 +1,5 @@
-// disable warnings for sprintf
-#define _CRT_SECURE_NO_WARNINGS
-// disable warnings for std::copy
-#define _SCL_SECURE_NO_WARNINGS
+#include "DefRegEval.h"
 
-#include "vtksys/CommandLineArguments.hxx"
 #include "vtkSmartPointer.h"
 #include "vtkXMLUnstructuredGridWriter.h" 
 #include "vtkUnstructuredGridWriter.h"
@@ -25,16 +21,10 @@
 #include "vtkCellData.h"
 #include "vtkPointData.h"
 #include "vtkExtractCells.h"
-
-#include "itkImageFileReader.h" 
-#include "itkImageFileWriter.h"
 #include "itkWarpImageFilter.h"
 #include "itkVTKImageToImageFilter.h"
 
-
-#include "vtkLsDynaBinaryPlotReader.h"
-
-static const int OBJECT_INTENSITY=100;
+#include "IO/vtkLsDynaBinaryPlotReader.h"
 
 void ExtractProstateData(vtkUnstructuredGrid* prostateGrid, vtkUnstructuredGrid* ugrid, vtkLsDynaBinaryPlotReader *plotReader)
 {
@@ -42,7 +32,7 @@ void ExtractProstateData(vtkUnstructuredGrid* prostateGrid, vtkUnstructuredGrid*
   //prostateGrid->SetPoints(points); // copy the point data
   //prostateGrid->Allocate();
   vtkCellData* cd=ugrid->GetCellData();
-  vtkIntArray* materialArray=vtkIntArray::SafeDownCast(cd->GetArray(plotReader->GetAttributeNameMaterial()));
+  vtkIntArray* materialArray=vtkIntArray::SafeDownCast(cd->GetArray(plotReader->GetArrayNameMaterial()));
 
   // copy only prostate material cells
   vtkCellArray *cells = ugrid->GetCells();
@@ -63,7 +53,7 @@ void ExtractProstateData(vtkUnstructuredGrid* prostateGrid, vtkUnstructuredGrid*
   }
 
   // Add only dislocation point data field
-  //prostateGrid->GetPointData()->AddArray(ugrid->GetPointData()->GetArray(plotReader->GetAttributeNameDisplacement()));
+  //prostateGrid->GetPointData()->AddArray(ugrid->GetPointData()->GetArray(plotReader->GetArrayNameDisplacement()));
 
     vtkSmartPointer<vtkExtractCells> cellExtractor=vtkSmartPointer<vtkExtractCells>::New();    
     cellExtractor->SetInput(ugrid);
@@ -223,7 +213,7 @@ int main(int argc, char *argv[])
 	stencil->SetInput(refImg);
 	stencil->SetStencil(polyToImage->GetOutput());
 	stencil->ReverseStencilOn();
-	stencil->SetBackgroundValue(OBJECT_INTENSITY);
+  stencil->SetBackgroundValue(DefRegEvalGlobal::OrganIntensity);
 	stencil->Update();
 
 	// Write to file
@@ -255,17 +245,17 @@ int main(int argc, char *argv[])
 		vtkPointData* pd=prostateGrid->GetPointData();
 		while(pd->GetNumberOfArrays()>1)
 		{
-			if (strcmp(pd->GetArrayName(0),plotReader->GetAttributeNameDisplacement())!=0)
+			if (strcmp(pd->GetArrayName(0),plotReader->GetArrayNameDisplacement())!=0)
 			{				
         pd->RemoveArray(pd->GetArrayName(0));
 			}
-      if (strcmp(pd->GetArrayName(1),plotReader->GetAttributeNameDisplacement())!=0)
+      if (strcmp(pd->GetArrayName(1),plotReader->GetArrayNameDisplacement())!=0)
 			{				
         pd->RemoveArray(pd->GetArrayName(1));
 			}
 		}
 
-		pd->SetActiveScalars(plotReader->GetAttributeNameDisplacement());
+		pd->SetActiveScalars(plotReader->GetArrayNameDisplacement());
 		refImg->SetNumberOfScalarComponents(3);
 		refImg->SetScalarTypeToFloat();
     refImg->AllocateScalars();
@@ -343,17 +333,17 @@ int main(int argc, char *argv[])
 		vtkPointData* pd=ugrid->GetPointData();
 		while(pd->GetNumberOfArrays()>1)
 		{
-			if (strcmp(pd->GetArrayName(0),plotReader->GetAttributeNameDisplacement())!=0)
+			if (strcmp(pd->GetArrayName(0),plotReader->GetArrayNameDisplacement())!=0)
 			{				
         pd->RemoveArray(pd->GetArrayName(0));
 			}
-      if (strcmp(pd->GetArrayName(1),plotReader->GetAttributeNameDisplacement())!=0)
+      if (strcmp(pd->GetArrayName(1),plotReader->GetArrayNameDisplacement())!=0)
 			{				
         pd->RemoveArray(pd->GetArrayName(1));
 			}
 		}
 
-		pd->SetActiveScalars(plotReader->GetAttributeNameDisplacement());
+		pd->SetActiveScalars(plotReader->GetArrayNameDisplacement());
 		refImg->SetNumberOfScalarComponents(3);
 		refImg->SetScalarTypeToFloat();
     refImg->AllocateScalars();

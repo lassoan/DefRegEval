@@ -1,0 +1,4 @@
+Add nightly tests (Febio, tetgen, basic deformations, etc.)
+Remove hardcoded material model from FEBioWriter
+Remove netgen mesh reader?
+Update examples/tests (have a few surface and image based registration tests)

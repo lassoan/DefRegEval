@@ -46,6 +46,20 @@ public:
   vtkSetMacro(NumberOfTimeSteps, int);
   vtkGetMacro(NumberOfTimeSteps, int);
 
+  // Description:
+  // Title of the solution
+  vtkSetStringMacro(Title);
+  vtkGetStringMacro(Title);
+
+  vtkGetStringMacro(ArrayNameMaterial);
+  vtkSetStringMacro(ArrayNameMaterial);
+
+  vtkSetMacro(OrganMaterialId, int);
+  vtkGetMacro(OrganMaterialId, int);
+
+  vtkSetMacro(SupportMaterialId, int);
+  vtkGetMacro(SupportMaterialId, int);
+
 protected:
   vtkFEBioWriter();
   virtual ~vtkFEBioWriter();
@@ -97,7 +111,25 @@ protected:
   // curves for loads
   bool WriteLoadData(ostream* fp);
 
+  char* Title;
+  double StepSize;
+  double MaxRefs;
+  double MaxUps;
+  double DTol;
+  double ETol;
+  double RTol;
+  double LsTol;
+  double PressureStiffness;
   int NumberOfTimeSteps;
+  double DtMin;
+  double TMax;
+  double MaxRetries;
+  double OptIter;
+
+  char* ArrayNameMaterial;
+
+  int OrganMaterialId;
+  int SupportMaterialId;
 
 private:
   vtkFEBioWriter(const vtkFEBioWriter&);  // Not implemented.

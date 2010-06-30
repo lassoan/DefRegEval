@@ -1,16 +1,9 @@
-// disable warnings for sprintf
-#define _CRT_SECURE_NO_WARNINGS
-// disable warnings for std::copy
-#define _SCL_SECURE_NO_WARNINGS
+#include "DefRegEval.h"
 
 #if defined(_MSC_VER)
 #pragma warning ( disable : 4786 )
 #endif
 
-
-#include "itkImage.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
 #include "itkSubtractImageFilter.h"
 #include "itkGradientToMagnitudeImageFilter.h"
 #include "itkMaskImageFilter.h"
@@ -18,7 +11,6 @@
 #include "itkGrayscaleFunctionErodeImageFilter.h"
 #include "itkThresholdImageFilter.h"
 
-#include "vtksys/CommandLineArguments.hxx"
 
 int main( int argc, char * argv[] )
 {

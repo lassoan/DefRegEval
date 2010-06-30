@@ -12,6 +12,8 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+#include "DefRegEval.h"
+
 #include "vtkFEBioWriter.h"
 
 #include "vtkByteSwap.h"
@@ -30,20 +32,32 @@
 # include <io.h> /* unlink */
 #endif
 
-static const char* ARRAY_NAME_MATERIAL="material";
-
-static const int SUPPORTED_DIMENSION=3;
-
-static const int PROSTATE_MATERIAL_ID=0;
-static const int SUPPORT_MATERIAL_ID=1;
-
-
 vtkCxxRevisionMacro(vtkFEBioWriter, "$Revision: 1.43 $");
 vtkStandardNewMacro(vtkFEBioWriter);
 
 vtkFEBioWriter::vtkFEBioWriter() 
 {
+  this->Title=NULL;
+  SetTitle("untitled");
+  this->StepSize=0.2;
+  this->MaxRefs=15;
+  this->MaxUps=10;
+  this->DTol=0.001;
+  this->ETol=0.01;
+  this->RTol=0;
+  this->LsTol=0.9;
+  this->PressureStiffness=1;
   this->NumberOfTimeSteps=10;
+  this->DtMin=0.01;
+  this->TMax=1.0;
+  this->MaxRetries=5;
+  this->OptIter=10;
+
+  this->ArrayNameMaterial=NULL;
+  this->SetArrayNameMaterial("material");
+
+  this->OrganMaterialId=0;
+  this->SupportMaterialId=1;
 }
 
 vtkFEBioWriter::~vtkFEBioWriter() 
@@ -107,24 +121,24 @@ void vtkFEBioWriter::PrintSelf(ostream& os, vtkIndent indent)
 bool vtkFEBioWriter::WriteControl(ostream* fp)
 {
   *fp << "<Control>" << vtkstd::endl;  
-  *fp << "<title>untitled</title>" << vtkstd::endl;  
-  *fp << "<time_steps>"<<this->NumberOfTimeSteps<<"</time_steps>" << vtkstd::endl;  
-  *fp << "<step_size>0.2</step_size>" << vtkstd::endl;  
-  *fp << "<max_refs>15</max_refs>" << vtkstd::endl;  
-  *fp << "<max_ups>10</max_ups>" << vtkstd::endl;  
-  *fp << "<dtol>0.001</dtol>" << vtkstd::endl;  
-  *fp << "<etol>0.01</etol>" << vtkstd::endl;  
-  *fp << "<rtol>0</rtol>" << vtkstd::endl;  
-  *fp << "<lstol>0.9</lstol>" << vtkstd::endl;  
-  *fp << "<pressure_stiffness>1</pressure_stiffness>" << vtkstd::endl;  
-  *fp << "<time_stepper>" << vtkstd::endl;  
-  *fp << "<dtmin>0.01</dtmin>" << vtkstd::endl;  
-  *fp << "<dtmax>"<<1.0/double(this->NumberOfTimeSteps)<<"</dtmax>" << vtkstd::endl;  
-  *fp << "<max_retries>5</max_retries>" << vtkstd::endl;  
-  *fp << "<opt_iter>10</opt_iter>" << vtkstd::endl;  
-  *fp << "</time_stepper>" << vtkstd::endl;  
-  //*fp << "<plot_level>PLOT_DEFAULT</plot_level>" << vtkstd::endl;  
-  *fp << "<plot_level>PLOT_MAJOR_ITRS</plot_level>" << vtkstd::endl;   // plot only major iterations (don't plot more time steps if the solver had to insert additional steps)
+  *fp << "  <title>" << this->Title << "</title>" << vtkstd::endl;  
+  *fp << "  <time_steps>"<<this->NumberOfTimeSteps<<"</time_steps>" << vtkstd::endl;  
+  *fp << "  <step_size>"<<this->StepSize<<"</step_size>" << vtkstd::endl;  
+  *fp << "  <max_refs>"<<this->MaxRefs<<"</max_refs>" << vtkstd::endl;  
+  *fp << "  <max_ups>"<<this->MaxUps<<"</max_ups>" << vtkstd::endl;  
+  *fp << "  <dtol>"<<this->DTol<<"</dtol>" << vtkstd::endl;  
+  *fp << "  <etol>"<<this->ETol<<"</etol>" << vtkstd::endl;  
+  *fp << "  <rtol>"<<this->RTol<<"</rtol>" << vtkstd::endl;  
+  *fp << "  <lstol>"<<this->LsTol<<"</lstol>" << vtkstd::endl;  
+  *fp << "  <pressure_stiffness>"<<this->PressureStiffness<<"</pressure_stiffness>" << vtkstd::endl;  
+  *fp << "  <time_stepper>" << vtkstd::endl;  
+  *fp << "    <dtmin>"<<this->DtMin<<"</dtmin>" << vtkstd::endl;  
+  *fp << "    <dtmax>"<<this->TMax/double(this->NumberOfTimeSteps)<<"</dtmax>" << vtkstd::endl;  
+  *fp << "    <max_retries>"<<this->MaxRetries<<"</max_retries>" << vtkstd::endl;  
+  *fp << "    <opt_iter>"<<this->OptIter<<"</opt_iter>" << vtkstd::endl;  
+  *fp << "  </time_stepper>" << vtkstd::endl;  
+  //*fp << "  <plot_level>PLOT_DEFAULT</plot_level>" << vtkstd::endl;  
+  *fp << "  <plot_level>PLOT_MAJOR_ITRS</plot_level>" << vtkstd::endl;   // plot only major iterations (don't plot more time steps if the solver had to insert additional steps)
   *fp << "</Control>" << vtkstd::endl;
   return true;
 }
@@ -134,13 +148,13 @@ bool vtkFEBioWriter::WriteMaterial(ostream* fp)
   *fp << "<Material>" << vtkstd::endl;  
 
   // material id-s are 1-based in the file and 0-based in VTK
-	*fp << "  <material id=\"" << PROSTATE_MATERIAL_ID+1 << "\" name=\"ProstateTissue\" type=\"linear elastic\">" << vtkstd::endl;
+  *fp << "  <material id=\"" << this->OrganMaterialId+1 << "\" name=\"OrganTissue\" type=\"linear elastic\">" << vtkstd::endl;
 	*fp << "    <E>21</E>" << vtkstd::endl;
   *fp << "    <v>0.45</v>" << vtkstd::endl;
 	*fp << "  </material>" << vtkstd::endl;
 
   // material id-s are 1-based in the file and 0-based in VTK
-  *fp << "  <material id=\"" << SUPPORT_MATERIAL_ID+1 << "\" name=\"ConnectiveTissue\" type=\"linear elastic\">" << vtkstd::endl;
+  *fp << "  <material id=\"" << this->SupportMaterialId+1 << "\" name=\"SupportTissue\" type=\"linear elastic\">" << vtkstd::endl;
   *fp << "    <E>11</E>" << vtkstd::endl;
   *fp << "    <v>0.3</v>" << vtkstd::endl;
   *fp << "  </material>" << vtkstd::endl;
@@ -202,7 +216,7 @@ bool vtkFEBioWriter::WriteGeometry(ostream* fp)
   vtkIntArray* materialArray=NULL;
   if (input->GetCellData()!=NULL)
   {
-    materialArray=vtkIntArray::SafeDownCast(input->GetCellData()->GetArray(ARRAY_NAME_MATERIAL));
+    materialArray=vtkIntArray::SafeDownCast(input->GetCellData()->GetArray(DefRegEvalGlobal::ArrayNameMaterial));
   }
   else
   {
@@ -228,8 +242,6 @@ bool vtkFEBioWriter::WriteGeometry(ostream* fp)
     {
       case VTK_TETRA:
         *fp << "  <tet4 id=\"" << c+1 << "\" mat=\"" << materialId+1 <<"\"> "; // xml cell id is 1-based in the file; material id-s are 1-based in the file and 0-based in VTK
-        // default tetrahedron point order in FEBio is 1, 2, 4, 3 (compared to netgen)
-        // default tetrahedron point order in FEBio is 1, 2, 3, 4 (compared to tetgen)
         *fp << cell->GetPointId(0)+1 << ", " << cell->GetPointId(1)+1 << ", " << cell->GetPointId(2)+1 << ", " << cell->GetPointId(3)+1; // cell ids are 1-based in the file, 0-based in VTK
         *fp << "</tet4>" << vtkstd::endl;
         break;

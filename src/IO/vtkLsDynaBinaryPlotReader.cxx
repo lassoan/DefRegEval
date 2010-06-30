@@ -34,13 +34,6 @@ PURPOSE.  See the above copyright notice for more information.
 vtkCxxRevisionMacro(vtkLsDynaBinaryPlotReader, "$Revision: 1.6 $");
 vtkStandardNewMacro(vtkLsDynaBinaryPlotReader);
 
-static const char* ARRAY_NAME_TIME="time";
-static const char* ARRAY_NAME_MATERIAL="material";
-static const char* ARRAY_NAME_DISPLACEMENT="displacement";
-static const char* ARRAY_NAME_VELOCITY="velocity";
-static const char* ARRAY_NAME_ACCELERATION="acceleration";
-static const char* ARRAY_NAME_TEMPERATURE="temperature";
-
 //----------------------------------------------------------------------------
 vtkLsDynaBinaryPlotReader::vtkLsDynaBinaryPlotReader()
 {
@@ -52,6 +45,19 @@ vtkLsDynaBinaryPlotReader::vtkLsDynaBinaryPlotReader()
   this->ApplyDeformationToPoints=1;
 
   this->SetNumberOfInputPorts(0);
+
+  this->ArrayNameTime=NULL;
+  this->SetArrayNameTime("time");
+  this->ArrayNameMaterial=NULL;
+  this->SetArrayNameMaterial("material");
+  this->ArrayNameDisplacement=NULL;
+  this->SetArrayNameDisplacement("displacement");
+  this->ArrayNameVelocity=NULL;
+  this->SetArrayNameVelocity("velocity");
+  this->ArrayNameAcceleration=NULL;
+  this->SetArrayNameAcceleration("acceleration");
+  this->ArrayNameTemperature=NULL;
+  this->SetArrayNameTemperature("temperature");
 }
 
 //----------------------------------------------------------------------------
@@ -98,7 +104,7 @@ int vtkLsDynaBinaryPlotReader::RequestData(
   vtkSmartPointer<vtkFloatArray> timeStepTimes = vtkSmartPointer<vtkFloatArray>::New();
   timeStepTimes->SetNumberOfComponents(1);
   timeStepTimes->SetNumberOfTuples(0); // will add timesteps one by one
-  timeStepTimes->SetName(ARRAY_NAME_TIME);
+  timeStepTimes->SetName(this->ArrayNameTime);
 
   // get total number of timesteps
   this->NumberOfTimeSteps=0;
@@ -135,7 +141,7 @@ int vtkLsDynaBinaryPlotReader::RequestData(
       // success
 
       // replace node points with deformed node points (optional), and set deformation into the displacement variable (instead of node position)
-      vtkFloatArray* deformedPointCoordinates = vtkFloatArray::SafeDownCast(output->GetPointData()->GetArray(ARRAY_NAME_DISPLACEMENT));
+      vtkFloatArray* deformedPointCoordinates = vtkFloatArray::SafeDownCast(output->GetPointData()->GetArray(this->ArrayNameDisplacement));
       vtkFloatArray* originalPoints=vtkFloatArray::SafeDownCast(output->GetPoints()->GetData());
       if (deformedPointCoordinates!=NULL && originalPoints!=NULL)
       {
@@ -245,7 +251,7 @@ void vtkLsDynaBinaryPlotReader::ReadGeometry(vtkUnstructuredGrid *output, FILE* 
   output->Allocate();
 
   vtkSmartPointer<vtkIntArray> materialArray=vtkSmartPointer<vtkIntArray>::New();
-  materialArray->SetName(ARRAY_NAME_MATERIAL);
+  materialArray->SetName(this->ArrayNameMaterial);
   materialArray->SetNumberOfComponents(1);
   materialArray->SetNumberOfTuples(fh.nel8+fh.nel2+fh.nel4);
   output->GetCellData()->AddArray(materialArray);
@@ -347,7 +353,7 @@ int vtkLsDynaBinaryPlotReader::ReadTimeStep(vtkUnstructuredGrid *output, FILE* f
     return 0;
   }
 
-  vtkFloatArray* timeStepTimes = vtkFloatArray::SafeDownCast(output->GetFieldData()->GetArray(ARRAY_NAME_TIME));
+  vtkFloatArray* timeStepTimes = vtkFloatArray::SafeDownCast(output->GetFieldData()->GetArray(this->ArrayNameTime));
   if (timeStepTimes!=NULL)
   {
     timeStepTimes->InsertNextValue(timeStepTime);
@@ -355,19 +361,19 @@ int vtkLsDynaBinaryPlotReader::ReadTimeStep(vtkUnstructuredGrid *output, FILE* f
 
   if (fh.flagU)
   {
-    ReadPointFieldData(output, fp, fh, 3, ARRAY_NAME_DISPLACEMENT);
+    ReadPointFieldData(output, fp, fh, 3, this->ArrayNameDisplacement);
   }
   if (fh.flagV)
   {
-    ReadPointFieldData(output, fp, fh, 3, ARRAY_NAME_VELOCITY);
+    ReadPointFieldData(output, fp, fh, 3, this->ArrayNameVelocity);
   }
   if (fh.flagA)
   {
-    ReadPointFieldData(output, fp, fh, 3, ARRAY_NAME_ACCELERATION);
+    ReadPointFieldData(output, fp, fh, 3, this->ArrayNameAcceleration);
   }
   if (fh.flagT)
   {
-    ReadPointFieldData(output, fp, fh, 1, ARRAY_NAME_TEMPERATURE);
+    ReadPointFieldData(output, fp, fh, 1, this->ArrayNameTemperature);
   }
 
   // Skip stress information  
@@ -435,16 +441,4 @@ void vtkLsDynaBinaryPlotReader::ReadPointFieldData(vtkUnstructuredGrid *output, 
 void vtkLsDynaBinaryPlotReader::SkipPointFieldData(FILE* fp, const FileHeaderType &fh, int numberOfComponents)
 {
   fseek(fp, fh.nump*numberOfComponents*sizeof(float), SEEK_CUR);
-}
-
-//----------------------------------------------------------------------------
-const char* vtkLsDynaBinaryPlotReader::GetAttributeNameMaterial()
-{
-  return ARRAY_NAME_MATERIAL;
-}
-
-//----------------------------------------------------------------------------
-const char* vtkLsDynaBinaryPlotReader::GetAttributeNameDisplacement()
-{
-  return ARRAY_NAME_DISPLACEMENT;
 }

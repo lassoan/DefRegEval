@@ -1,5 +1,7 @@
 // Convert binary metaimage to smoothed STL mesh
 
+#include "DefRegEval.h"
+
 #include "vtkSmartPointer.h"
 #include "vtkMetaImageReader.h"
 #include "vtkContourFilter.h"
@@ -17,15 +19,7 @@
 #include "vtkCellData.h"
 #include "vtkDecimatePro.h"
 
-#include "vtkSMeshWriter.h"
-
-#include "vtksys/CommandLineArguments.hxx"
-
-static const int OBJECT_INTENSITY=100;
-static const char* ARRAY_NAME_MATERIAL="material";
-
-static const int PROSTATE_MATERIAL_ID=0;
-static const int SUPPORT_MATERIAL_ID=1;
+#include "IO/vtkSMeshWriter.h"
 
 /////////////////////
 
@@ -33,7 +27,7 @@ void SetMaterial(vtkPolyData *poly, int materialId)
 {
   int numberOfCells=poly->GetNumberOfCells();
   vtkSmartPointer<vtkIntArray> materialArray=vtkSmartPointer<vtkIntArray>::New();
-  materialArray->SetName(ARRAY_NAME_MATERIAL);
+  materialArray->SetName(DefRegEvalGlobal::ArrayNameMaterial);
   materialArray->SetNumberOfComponents(1);
   materialArray->SetNumberOfTuples(numberOfCells);
   poly->GetCellData()->AddArray(materialArray);  
@@ -145,19 +139,19 @@ int main(int argc, char *argv[])
 
   vtkSmartPointer<vtkAppendPolyData> polyAppender=vtkSmartPointer<vtkAppendPolyData>::New();
 
-  SetMaterial(prostatePoly, PROSTATE_MATERIAL_ID);
+  SetMaterial(prostatePoly, DefRegEvalGlobal::OrganMaterialId);
   polyAppender->AddInput( prostatePoly ); 
   // need to specify a position within the prostate, we assuem that the center of the support
   // is within the prostate
   // :TODO: compute point from the prostatePoly
   double prostatePoint[3]={supportPosition[0],supportPosition[1],supportPosition[2]};
-  writer->AddRegion("prostate", prostatePoint, PROSTATE_MATERIAL_ID);
+  writer->AddRegion("prostate", prostatePoint, DefRegEvalGlobal::OrganMaterialId);
 
-  SetMaterial(supportPoly, SUPPORT_MATERIAL_ID);
+  SetMaterial(supportPoly, DefRegEvalGlobal::SupportMaterialId);
   polyAppender->AddInput( supportPoly ); 
   // need to specify a position within support region (not within the prostate)
   double supportPoint[3]={supportPosition[0],supportPosition[1]+supportRadius*0.95,supportPosition[2]};
-  writer->AddRegion("support", supportPoint, SUPPORT_MATERIAL_ID);
+  writer->AddRegion("support", supportPoint, DefRegEvalGlobal::SupportMaterialId);
   
   writer->SetInputConnection(polyAppender->GetOutputPort());      
   writer->Update();
@@ -211,7 +205,7 @@ int main(int argc, char *argv[])
 		stencil->SetInput(refImg);
 		stencil->SetStencil(polyToImage->GetOutput());
 		stencil->ReverseStencilOn();
-		stencil->SetBackgroundValue(OBJECT_INTENSITY);
+    stencil->SetBackgroundValue(DefRegEvalGlobal::OrganIntensity);
 		stencil->Update();
 
 		// Write to file

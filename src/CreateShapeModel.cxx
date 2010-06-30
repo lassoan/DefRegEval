@@ -1,27 +1,16 @@
-// disable warnings for sprintf
-#define _CRT_SECURE_NO_WARNINGS
-// disable warnings for std::copy
-#define _SCL_SECURE_NO_WARNINGS
+#include "DefRegEval.h"
 
-#include "itkImage.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
 #include "itkShiftScaleImageFilter.h"
 #include "itkSignedDanielssonDistanceMapImageFilter.h"
 #include "itkImagePCAShapeModelEstimator.h"
 #include "itkUnaryFunctorImageFilter.h"
 
-#include "vtksys/CommandLineArguments.hxx"
 #include "vtksys/SystemTools.hxx"
 #include "vtksys/Directory.hxx"
 
 static const int NUMBER_OF_EIGEN_MODES=3;
 
-typedef float  PixelType;
-static const unsigned int  Dimension = 3;
-typedef itk::Image <PixelType, Dimension> InternalImageType;
 typedef itk::Image <unsigned char, 3> OutputImageType;
-typedef itk::ImageFileReader< InternalImageType  > ImageReaderType;
 
 template <class InputPixelType>
 class ContourOfSignedDistanceMapFunctor
@@ -110,7 +99,7 @@ int main(int argc, char *argv[])
 
   //in a for loop read all the training images one by one
   //and generate distance map for each
-  ImageReaderType::Pointer  imageReader  = ImageReaderType::New();
+  InternalImageReaderType::Pointer  imageReader  = InternalImageReaderType::New();
   for (int i=0; i<fileNames.size(); i++)
   {	
     std::cout<<"reading aligned shape: "<<fileNames.at(i)<<std::endl;

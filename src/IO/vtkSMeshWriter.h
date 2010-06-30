@@ -41,6 +41,9 @@ public:
 
   void AddRegion(const char* name, double *pos, int materialId, double maxElementVolume=-1);
 
+  vtkSetStringMacro(ArrayNameMaterial);
+  vtkGetStringMacro(ArrayNameMaterial);
+
 protected:
   vtkSMeshWriter();
   virtual ~vtkSMeshWriter();
@@ -63,6 +66,8 @@ protected:
   typedef vtkstd::vector<MeshRegion> MeshRegionListType;
   MeshRegionListType MeshRegionList;
   // ETX
+
+  char* ArrayNameMaterial;
 
 private:
   vtkSMeshWriter(const vtkSMeshWriter&);  // Not implemented.

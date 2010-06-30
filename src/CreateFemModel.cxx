@@ -1,17 +1,10 @@
-// disable warnings for sprintf
-#define _CRT_SECURE_NO_WARNINGS
-// disable warnings for std::copy
-#define _SCL_SECURE_NO_WARNINGS
+#include "DefRegEval.h"
 
-#include "itkImage.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
 #include "itkUnaryFunctorImageFilter.h" 
 #include "itkShiftScaleImageFilter.h"
 #include "itkAddImageFilter.h"
 #include "itkSubtractImageFilter.h"
 
-#include "vtksys/CommandLineArguments.hxx"
 #include "vtkSmartPointer.h"
 #include "vtkXMLUnstructuredGridWriter.h" 
 #include "vtkUnstructuredGridWriter.h"
@@ -25,23 +18,13 @@
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkAppendPolyData.h"
-
 #include "vtkSTLReader.h"
-
-
 #include "IO/vtkNetgenMeshReader.h"
 #include "IO/vtkMeditMeshReader.h"
-#include "Random.h"
 
-typedef float  PixelType;
-static const unsigned int  Dimension = 3;
-typedef itk::Image <PixelType, Dimension> InternalImageType;
 typedef itk::Image <unsigned char, 3> OutputImageType;
-typedef itk::ImageFileReader< InternalImageType  > ImageReaderType;
 
-static const int SUPPORTED_DIMENSION=3;
-static const char* ARRAY_NAME_ONSURFACE="on_surface";
-  
+
 // squared distance between a line and a point (use sqrt to get actual distance)
 static double PointDistance2FromLine(double point[3], double L[3], double v[3])
 {
@@ -94,7 +77,7 @@ void AddSurfaceTrianglePointIdsInSphere(vtkIdList *trianglePointIds, vtkUnstruct
   double radius2=boundingSphereRadius*boundingSphereRadius;
 
   vtkDoubleArray* pointCoords=vtkDoubleArray::SafeDownCast(ugrid->GetPoints()->GetData());
-  vtkCharArray* onSurfaceArray=vtkCharArray::SafeDownCast(ugrid->GetPointData()->GetArray(ARRAY_NAME_ONSURFACE));
+  vtkCharArray* onSurfaceArray=vtkCharArray::SafeDownCast(ugrid->GetPointData()->GetArray(DefRegEvalGlobal::ArrayNameOnSurface));
 
 	// Extract all the triangles from the polyhedra elements
 	//ugrid->Update();
@@ -190,13 +173,13 @@ bool AddPointIdsInSphere(vtkIdList* pointIds, vtkUnstructuredGrid* ugrid, double
   {
     return false;
   }
-  vtkCharArray* onSurfaceArray=vtkCharArray::SafeDownCast(ugrid->GetPointData()->GetArray(ARRAY_NAME_ONSURFACE));
+  vtkCharArray* onSurfaceArray=vtkCharArray::SafeDownCast(ugrid->GetPointData()->GetArray(DefRegEvalGlobal::ArrayNameOnSurface));
   if (onSurfaceArray==NULL)
   {
     return false;
   } 
   int numberOfComponents=pointCoords->GetNumberOfComponents();
-  if (numberOfComponents!=SUPPORTED_DIMENSION)
+  if (numberOfComponents!=ImageDimension)
   {
     return false;
   }

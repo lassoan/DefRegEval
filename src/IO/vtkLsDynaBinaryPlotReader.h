@@ -84,9 +84,20 @@ public:
   vtkGetMacro(ApplyDeformationToPoints,int);
   vtkBooleanMacro(ApplyDeformationToPoints,int);
 
-  const char* GetAttributeNameMaterial();
-  const char* GetAttributeNameDisplacement();
+  vtkGetStringMacro(ArrayNameTime);
+  vtkGetStringMacro(ArrayNameMaterial);
+  vtkGetStringMacro(ArrayNameDisplacement);
+  vtkGetStringMacro(ArrayNameVelocity);
+  vtkGetStringMacro(ArrayNameAcceleration);
+  vtkGetStringMacro(ArrayNameTemperature);
+  vtkSetStringMacro(ArrayNameTime);
+  vtkSetStringMacro(ArrayNameMaterial);
+  vtkSetStringMacro(ArrayNameDisplacement);
+  vtkSetStringMacro(ArrayNameVelocity);
+  vtkSetStringMacro(ArrayNameAcceleration);
+  vtkSetStringMacro(ArrayNameTemperature);
 
+ 
 protected:
   vtkLsDynaBinaryPlotReader();
   ~vtkLsDynaBinaryPlotReader();
@@ -97,6 +108,13 @@ protected:
   int RequestedTimeStep;
   int NumberOfTimeSteps;
   int ApplyDeformationToPoints;
+
+  char* ArrayNameTime;
+  char* ArrayNameMaterial;
+  char* ArrayNameDisplacement;
+  char* ArrayNameVelocity;
+  char* ArrayNameAcceleration;
+  char* ArrayNameTemperature;
 
 private:
   void ReadNodePoints(vtkUnstructuredGrid *output, FILE* fp, const FileHeaderType &fh);

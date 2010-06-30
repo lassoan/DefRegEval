@@ -1,25 +1,14 @@
-// disable warnings for sprintf
-#define _CRT_SECURE_NO_WARNINGS
-// disable warnings for std::copy
-#define _SCL_SECURE_NO_WARNINGS
+#include "DefRegEval.h"
 
-#include "itkImage.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
 #include "itkUnaryFunctorImageFilter.h" 
 #include "itkShiftScaleImageFilter.h"
 #include "itkAddImageFilter.h"
 #include "itkSubtractImageFilter.h"
 
-#include "vtksys/CommandLineArguments.hxx"
+#include "vtkSmartPointer.h"
+#include "vtkMinimalStandardRandomSequence.h"
 
-#include "Random.h"
-
-typedef float  PixelType;
-static const unsigned int  Dimension = 3;
-typedef itk::Image <PixelType, Dimension> InternalImageType;
 typedef itk::Image <unsigned char, 3> OutputImageType;
-typedef itk::ImageFileReader< InternalImageType  > ImageReaderType;
 
 ////////////////
 const double MIN_WEIGHT_MODE_1 = -0.2;
@@ -98,7 +87,7 @@ int main(int argc, char *argv[])
 			variationModeFile.append("\\VariationMode_");
 			variationModeFile.append(Suffix);
 
-			ImageReaderType::Pointer  ImageReader  = ImageReaderType::New();
+			InternalImageReaderType::Pointer  ImageReader  = InternalImageReaderType::New();
 			ImageReader->SetFileName(variationModeFile.c_str());
 
 			try
@@ -119,7 +108,7 @@ int main(int argc, char *argv[])
 	//get mean shape
 	if(!MeanShape)
 	{
-		ImageReaderType::Pointer  ImageReader  = ImageReaderType::New();
+		InternalImageReaderType::Pointer  ImageReader  = InternalImageReaderType::New();
 
 		std::string meanShapeFile = shapeModelDir;
 		meanShapeFile.append("\\MeanShape_DMap.mha");
@@ -141,16 +130,19 @@ int main(int argc, char *argv[])
 	}
 
 	//generate n random prostate contours
-	Random random;
+  vtkSmartPointer<vtkMinimalStandardRandomSequence> random = vtkSmartPointer<vtkMinimalStandardRandomSequence>::New();
 
 	typedef itk::UnaryFunctorImageFilter<InternalImageType,OutputImageType,ContourOfSignedDistanceMapFunctor<typename InternalImageType::PixelType> > ContourExtractorType;
 	ContourExtractorType::Pointer contourExtractor = ContourExtractorType::New();
 
 	//randomize PCA weights
 	double sigmaFactor[3];
-	sigmaFactor[0] = random.randomDouble(MIN_WEIGHT_MODE_1, MAX_WEIGHT_MODE_1);
-	sigmaFactor[1] = random.randomDouble(MIN_WEIGHT_MODE_2, MAX_WEIGHT_MODE_2);
-	sigmaFactor[2] = random.randomDouble(MIN_WEIGHT_MODE_3, MAX_WEIGHT_MODE_3);
+  random->Next();
+	sigmaFactor[0] = random->GetRangeValue(MIN_WEIGHT_MODE_1, MAX_WEIGHT_MODE_1);
+  random->Next();
+	sigmaFactor[1] = random->GetRangeValue(MIN_WEIGHT_MODE_2, MAX_WEIGHT_MODE_2);
+  random->Next();
+	sigmaFactor[2] = random->GetRangeValue(MIN_WEIGHT_MODE_3, MAX_WEIGHT_MODE_3);
 
 	//force them to have two decimal places
 	sigmaFactor[0] = (double)((int)(sigmaFactor[0] * 100))/(double)100;

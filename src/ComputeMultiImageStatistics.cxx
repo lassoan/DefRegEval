@@ -1,16 +1,9 @@
-// disable warnings for sprintf
-#define _CRT_SECURE_NO_WARNINGS
-// disable warnings for std::copy
-#define _SCL_SECURE_NO_WARNINGS
-
+#include "DefRegEval.h"
 #if defined(_MSC_VER)
 #pragma warning ( disable : 4786 )
 #endif
 
 
-#include "itkImage.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
 #include "itkSubtractImageFilter.h"
 #include "itkGradientToMagnitudeImageFilter.h"
 #include "itkMaskImageFilter.h"
@@ -19,14 +12,8 @@
 #include "itkThresholdImageFilter.h"
 #include "itkImageDuplicator.h"
 #include "itkMaximumImageFilter.h"
-
 #include "itkShiftScaleImageFilter.h"
 #include "itkAddImageFilter.h"
-#include "itkSubtractImageFilter.h"
-
-#include "vtksys/CommandLineArguments.hxx"
-
-
 
 void readTextLineToListOfString(const char* textFileName, std::vector< std::string > &listOfStrings)
 {
@@ -52,10 +39,6 @@ void readTextLineToListOfString(const char* textFileName, std::vector< std::stri
   f.close();
 
 } 
-
-
-
-
 
 int main( int argc, char * argv[] )
 {
