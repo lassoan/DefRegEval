@@ -26,40 +26,40 @@
 
 #include "IO/vtkLsDynaBinaryPlotReader.h"
 
-void ExtractProstateData(vtkUnstructuredGrid* prostateGrid, vtkUnstructuredGrid* ugrid, vtkLsDynaBinaryPlotReader *plotReader)
+void ExtractOrganData(vtkUnstructuredGrid* organGrid, vtkUnstructuredGrid* ugrid, vtkLsDynaBinaryPlotReader *plotReader)
 {
   vtkPoints *points = ugrid->GetPoints();
-  //prostateGrid->SetPoints(points); // copy the point data
-  //prostateGrid->Allocate();
+  //organGrid->SetPoints(points); // copy the point data
+  //organGrid->Allocate();
   vtkCellData* cd=ugrid->GetCellData();
   vtkIntArray* materialArray=vtkIntArray::SafeDownCast(cd->GetArray(plotReader->GetArrayNameMaterial()));
 
-  // copy only prostate material cells
+  // copy only organ material cells
   vtkCellArray *cells = ugrid->GetCells();
   cells->InitTraversal();	
   vtkIdType npts, *pts;
   int cell=-1;
-  vtkSmartPointer<vtkIdList> prostateCells=vtkSmartPointer<vtkIdList>::New();    
+  vtkSmartPointer<vtkIdList> organCells=vtkSmartPointer<vtkIdList>::New();    
   while (cells->GetNextCell(npts, pts))
   {
     cell++;
     if (npts != 4 || materialArray->GetValue(cell)!=1)
     {
-      // only extract tetrahedra, skip non-prostate material
+      // only extract tetrahedra, skip non-organ material
       continue;
     }
-    //prostateGrid->InsertNextCell(VTK_TETRA, npts, pts);      
-    prostateCells->InsertNextId(cell);      
+    //organGrid->InsertNextCell(VTK_TETRA, npts, pts);      
+    organCells->InsertNextId(cell);      
   }
 
   // Add only dislocation point data field
-  //prostateGrid->GetPointData()->AddArray(ugrid->GetPointData()->GetArray(plotReader->GetArrayNameDisplacement()));
+  //organGrid->GetPointData()->AddArray(ugrid->GetPointData()->GetArray(plotReader->GetArrayNameDisplacement()));
 
     vtkSmartPointer<vtkExtractCells> cellExtractor=vtkSmartPointer<vtkExtractCells>::New();    
     cellExtractor->SetInput(ugrid);
-    cellExtractor->SetCellList(prostateCells);
+    cellExtractor->SetCellList(organCells);
     cellExtractor->Update();
-    prostateGrid->ShallowCopy(cellExtractor->GetOutput());
+    organGrid->ShallowCopy(cellExtractor->GetOutput());
 
 }
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 	args.AddArgument("--referenceImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &referenceImageFilename, "Reference image, the output image will have the same origin, spacing and orientation");
 	args.AddArgument("--outputImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputImageFilename, "Output deformed image corresponding to the specified solver timestep");
 	args.AddArgument("--outputVolumeMesh", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputVolumeMeshFilename, "Output deformed grid (vtu) corresponding to the specified solver timestep. (optional)"); 
-	args.AddArgument("--outputDeformationFieldImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputDeformationFieldImageFilename, "Deformation field for the prostate region, sampled in the reference image space"); 
+	args.AddArgument("--outputDeformationFieldImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputDeformationFieldImageFilename, "Deformation field for the organ region, sampled in the reference image space"); 
 	args.AddArgument("--outputFullImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputFullImageFilename, "Full image transformed by the deformation field"); 
 	args.AddArgument("--outputFullDeformationFieldImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputFullDeformationFieldImageFilename, "Deformation field for the full image, sampled in the reference image space"); 
 	args.AddArgument("--solverTimeStep", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &solverTimeStep, "The plot file usually contains deformations for several timesteps. Solver timestep defines which one to extract (optional, default is the last timestep)."); 
@@ -106,11 +106,11 @@ int main(int argc, char *argv[])
 		plotReader->ApplyDeformationToPointsOff();
     plotReader->Update();
 
-    vtkSmartPointer<vtkUnstructuredGrid> prostateGrid=vtkSmartPointer<vtkUnstructuredGrid>::New();
-    ExtractProstateData(prostateGrid, plotReader->GetOutput(), plotReader);
+    vtkSmartPointer<vtkUnstructuredGrid> organGrid=vtkSmartPointer<vtkUnstructuredGrid>::New();
+    ExtractOrganData(organGrid, plotReader->GetOutput(), plotReader);
 
 		vtkSmartPointer<vtkXMLUnstructuredGridWriter> xmlGridWriter=vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
-		xmlGridWriter->SetInput(prostateGrid);  
+		xmlGridWriter->SetInput(organGrid);  
 		xmlGridWriter->SetFileName(outputVolumeMeshFilename.c_str());		
 		xmlGridWriter->Update();
 	}
@@ -125,18 +125,18 @@ int main(int argc, char *argv[])
 	}
 	ugrid->Update();
 	
-  // Copy the unstructured grid, but only the prostate cells and the dislocation vector
-  vtkSmartPointer<vtkUnstructuredGrid> prostateGrid=vtkSmartPointer<vtkUnstructuredGrid>::New();
-  ExtractProstateData(prostateGrid, ugrid, plotReader);
+  // Copy the unstructured grid, but only the organ cells and the dislocation vector
+  vtkSmartPointer<vtkUnstructuredGrid> organGrid=vtkSmartPointer<vtkUnstructuredGrid>::New();
+  ExtractOrganData(organGrid, ugrid, plotReader);
 
   // Extract all the triangles from the polyhedra elements
 	vtkSmartPointer<vtkPolyData> surface=vtkSmartPointer<vtkPolyData>::New();
 
-	vtkPoints *points = prostateGrid->GetPoints();
+	vtkPoints *points = organGrid->GetPoints();
 	surface->SetPoints(points); // copy the point data
 	surface->Allocate();
 
-  vtkCellArray *cells = prostateGrid->GetCells();
+  vtkCellArray *cells = organGrid->GetCells();
 	cells->InitTraversal();	
 	vtkIdType tri1[3];
 	vtkIdType tri2[3];
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
     if (npts != 4 /*|| materialArray->GetValue(cell)!=1*/)
 		{
 			// only extract tetrahedra
-      // only extract material 1 (prostate)
+      // only extract material 1 (organ)
 			continue;
 		}
 		// Ordering: counter-clockwise (http://www.vtk.org/VTK/img/file-formats.pdf)
@@ -230,19 +230,19 @@ int main(int argc, char *argv[])
 		plotReader->Update();
 		vtkUnstructuredGrid* ugrid=vtkUnstructuredGrid::SafeDownCast(plotReader->GetOutput());
 
-    // Copy the unstructured grid, but only the prostate cells and the dislocation vector
-    vtkSmartPointer<vtkUnstructuredGrid> prostateGrid=vtkSmartPointer<vtkUnstructuredGrid>::New();
-    ExtractProstateData(prostateGrid, ugrid, plotReader);
+    // Copy the unstructured grid, but only the organ cells and the dislocation vector
+    vtkSmartPointer<vtkUnstructuredGrid> organGrid=vtkSmartPointer<vtkUnstructuredGrid>::New();
+    ExtractOrganData(organGrid, ugrid, plotReader);
 
 		//remove all cell data
-		vtkCellData* cd=prostateGrid->GetCellData();
+		vtkCellData* cd=organGrid->GetCellData();
 		while (cd->GetNumberOfArrays()>0)
 		{
 			cd->RemoveArray(cd->GetArrayName(0));
 		}
 
 		// keep only displacement point data
-		vtkPointData* pd=prostateGrid->GetPointData();
+		vtkPointData* pd=organGrid->GetPointData();
 		while(pd->GetNumberOfArrays()>1)
 		{
 			if (strcmp(pd->GetArrayName(0),plotReader->GetArrayNameDisplacement())!=0)
@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
     // through those voxels (it can take about 1-2 minutes for a 256x256x26 image).
     vtkSmartPointer<vtkImageData> nonZeroImg=vtkSmartPointer<vtkImageData>::New();
     nonZeroImg->DeepCopy(refImg);
-    double *gridExtent=prostateGrid->GetBounds();
+    double *gridExtent=organGrid->GetBounds();
     int *refImgExtent=refImg->GetExtent();
     int nonZeroImgExtent[6];
     for (int i=0; i<3; i++)
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 
 		vtkSmartPointer<vtkProbeFilter> probeFilter=vtkSmartPointer<vtkProbeFilter>::New();
 		probeFilter->SetInput(nonZeroImg);
-		probeFilter->SetSource(prostateGrid);	
+		probeFilter->SetSource(organGrid);	
     probeFilter->Update();
 
     refImg->CopyAndCastFrom(vtkImageData::SafeDownCast(probeFilter->GetOutput()), nonZeroImgExtent);

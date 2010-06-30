@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
   {
     std::string fname = d.GetFile(cc);
     std::string realName = inputTrainingShapesDir + "/" + fname;
-    if (!vtksys::SystemTools::FileIsDirectory(realName.c_str()) )
+    if (vtksys::SystemTools::FileIsDirectory(realName.c_str()) )
     {
       continue;
     }    
@@ -82,6 +82,13 @@ int main(int argc, char *argv[])
     }
     fileNames.push_back(realName);
   } 
+  
+  if (fileNames.size()<1)
+  {
+    std::cout<<"ERROR: couldn't find any .mha files in "<<inputTrainingShapesDir<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+  
   std::cout<<"reading aligned shapes"<<std::endl<<std::endl;
   
   //define the distance map generator filter
@@ -127,13 +134,14 @@ int main(int argc, char *argv[])
 
   typedef itk::ImageFileWriter< InternalImageType >  WriterType;
   WriterType::Pointer writer =  WriterType::New();
+  writer->SetUseCompression(true);
 
   std::cout<<"outputting signed distance map of mean shape"<<std::endl;
   //output distance map of mean shape
   InternalImageType::Pointer meanShape = shapeEstimator->GetOutput(0);
   std::string meanShapeDistanceMapFile = outputShapeModelDir;
   meanShapeDistanceMapFile.append("\\MeanShape_DMap.mha");
-  writer->SetFileName(meanShapeDistanceMapFile.c_str());
+  writer->SetFileName(meanShapeDistanceMapFile.c_str());  
   writer->SetInput(meanShape);
   writer->Update();
   std::cout<<"mean shape signed distance map generation complete"<<std::endl<<std::endl;
@@ -150,6 +158,7 @@ int main(int argc, char *argv[])
   OutputImageType::Pointer MeanImageContour = contourExtractor->GetOutput();
   typedef itk::ImageFileWriter< OutputImageType >  BinaryWriterType;
   BinaryWriterType::Pointer binaryWriter = BinaryWriterType::New();
+  binaryWriter->SetUseCompression(true);
   std::string meanShapeFile = outputShapeModelDir;
   meanShapeFile.append("\\MeanShape.mha");
   binaryWriter->SetFileName(meanShapeFile.c_str());

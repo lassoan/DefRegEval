@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
 
 /*
 vtkSmartPointer<vtkXMLUnstructuredGridWriter> xmlGridWriter=vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
-xmlGridWriter->SetInput(prostateMeshReader->GetOutput());  
+xmlGridWriter->SetInput(organMeshReader->GetOutput());  
 xmlGridWriter->SetFileName(outputFilename.c_str());		
 xmlGridWriter->Update(); 
 */

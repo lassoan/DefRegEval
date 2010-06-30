@@ -16226,7 +16226,7 @@ long tetgenmesh::delaunizevertices()
   }
 
   // Form the DT by incremental flip Delaunay algorithm.
-  success = incrflipdelaunay(NULL, insertarray, arraysize, true, b->plc,
+  success = incrflipdelaunay(NULL, insertarray, arraysize, true, (b->plc)!=0,
                              0.0, NULL);
 
   if (b->btree) {

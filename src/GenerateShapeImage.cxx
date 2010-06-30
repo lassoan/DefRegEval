@@ -32,7 +32,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-	std::string shapeModelDir = "C:\\ProstateErrorMapRendering\\Output";
+	std::string shapeModelDir = "C:\\OrganErrorMapRendering\\Output";
 	std::string outputImageFilename = "shape-image.mha";
 
 	vtksys::CommandLineArguments args;
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 		MeanShape = ImageReader->GetOutput();
 	}
 
-	//generate n random prostate contours
+	//generate n random organ contours
   vtkSmartPointer<vtkMinimalStandardRandomSequence> random = vtkSmartPointer<vtkMinimalStandardRandomSequence>::New();
 
 	typedef itk::UnaryFunctorImageFilter<InternalImageType,OutputImageType,ContourOfSignedDistanceMapFunctor<typename InternalImageType::PixelType> > ContourExtractorType;

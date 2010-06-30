@@ -52,10 +52,10 @@ int main(int argc, char *argv[])
 	vtksys::CommandLineArguments args;
 	args.Initialize(argc, argv);
 
-	args.AddArgument("--ProstateImageInputFn", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &inputImageFilename, "Input image filename (mha)");
-  args.AddArgument("--ProstateImageThreshold", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &objectSegmentationThreshold, "Segmentation threshold value");
-  args.AddArgument("--ProstateSurfMeshOutputFn", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputObjectSurfaceFilename, "Output surface filename of the object (stl) [optional]");
-	args.AddArgument("--ProstateImageOutputFn", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputObjectImageFilename, "Smoothed image corresponding to the extracted surface (stl)");  
+	args.AddArgument("--OrganImageInputFn", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &inputImageFilename, "Input image filename (mha)");
+  args.AddArgument("--OrganImageThreshold", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &objectSegmentationThreshold, "Segmentation threshold value");
+  args.AddArgument("--OrganSurfMeshOutputFn", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputObjectSurfaceFilename, "Output surface filename of the object (stl) [optional]");
+	args.AddArgument("--OrganImageOutputFn", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputObjectImageFilename, "Smoothed image corresponding to the extracted surface (stl)");  
 
   args.AddArgument("--SupportPosition", vtksys::CommandLineArguments::MULTI_ARGUMENT, &supportPosition, "Center of the support material sphere"); 
   args.AddArgument("--SupportRadius", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &supportRadius, "Radius of the support material sphere"); 
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 	objectSurfaceSmoother->SetInputConnection(objectSurfaceExtractor->GetOutputPort()); 
 	objectSurfaceSmoother->NormalizeCoordinatesOn();
 
-	// Empirical values for prostate atlas images
+	// Empirical values for organ atlas images
 	objectSurfaceSmoother->SetPassBand(0.05);
 	objectSurfaceSmoother->SetNumberOfIterations(80);
 
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 	  writer->Update();
   }
 
-  vtkPolyData *prostatePoly=vtkPolyData::SafeDownCast(objectSurfaceNormals->GetOutput());
+  vtkPolyData *organPoly=vtkPolyData::SafeDownCast(objectSurfaceNormals->GetOutput());
   vtkPolyData *supportPoly=vtkPolyData::SafeDownCast(supportVolumeNormals->GetOutput());
 
   // Write combined mesh
@@ -139,17 +139,17 @@ int main(int argc, char *argv[])
 
   vtkSmartPointer<vtkAppendPolyData> polyAppender=vtkSmartPointer<vtkAppendPolyData>::New();
 
-  SetMaterial(prostatePoly, DefRegEvalGlobal::OrganMaterialId);
-  polyAppender->AddInput( prostatePoly ); 
-  // need to specify a position within the prostate, we assuem that the center of the support
-  // is within the prostate
-  // :TODO: compute point from the prostatePoly
-  double prostatePoint[3]={supportPosition[0],supportPosition[1],supportPosition[2]};
-  writer->AddRegion("prostate", prostatePoint, DefRegEvalGlobal::OrganMaterialId);
+  SetMaterial(organPoly, DefRegEvalGlobal::OrganMaterialId);
+  polyAppender->AddInput( organPoly ); 
+  // need to specify a position within the organ, we assuem that the center of the support
+  // is within the organ
+  // :TODO: compute point from the organPoly
+  double organPoint[3]={supportPosition[0],supportPosition[1],supportPosition[2]};
+  writer->AddRegion("organ", organPoint, DefRegEvalGlobal::OrganMaterialId);
 
   SetMaterial(supportPoly, DefRegEvalGlobal::SupportMaterialId);
   polyAppender->AddInput( supportPoly ); 
-  // need to specify a position within support region (not within the prostate)
+  // need to specify a position within support region (not within the organ)
   double supportPoint[3]={supportPosition[0],supportPosition[1]+supportRadius*0.95,supportPosition[2]};
   writer->AddRegion("support", supportPoint, DefRegEvalGlobal::SupportMaterialId);
   
