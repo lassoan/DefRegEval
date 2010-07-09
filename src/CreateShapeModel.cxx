@@ -82,15 +82,15 @@ int main(int argc, char *argv[])
     }
     fileNames.push_back(realName);
   } 
-  
+
   if (fileNames.size()<1)
   {
     std::cout<<"ERROR: couldn't find any .mha files in "<<inputTrainingShapesDir<<std::endl;
     exit(EXIT_FAILURE);
   }
-  
+
   std::cout<<"reading aligned shapes"<<std::endl<<std::endl;
-  
+
   //define the distance map generator filter
   typedef itk::SignedDanielssonDistanceMapImageFilter<InternalImageType, InternalImageType> DistanceMapFilterType;
 
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-	//create directory for output		
+  //create directory for output		
   vtksys::SystemTools::MakeDirectory(outputShapeModelDir.c_str());
 
   typedef itk::ImageFileWriter< InternalImageType >  WriterType;

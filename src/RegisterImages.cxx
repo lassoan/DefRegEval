@@ -21,27 +21,13 @@
 
 #include <fstream>
 
-typedef unsigned char  ExternalImagePixelType;
-typedef itk::Image <ExternalImagePixelType, ImageDimension> OutputImageType;
-
-typedef itk::Vector<InternalImagePixelType, ImageDimension> VectorPixelType;
-typedef itk::Image<VectorPixelType,  ImageDimension> DeformationFieldType;
 
 //////////////////////////
 
-typedef   itk::Image< ExternalImagePixelType, ImageDimension >  FixedImageType;
-typedef   itk::Image< ExternalImagePixelType, ImageDimension >  MovingImageType;
-
-typedef   itk::ImageFileReader< FixedImageType  >  FixedReaderType;
-typedef   itk::ImageFileReader< MovingImageType >  MovingReaderType;
-
-typedef itk::LevelSetMotionRegistrationFilter<InternalImageType,InternalImageType,DeformationFieldType>   DeformableRegistrationFilterType;
-
+typedef itk::LevelSetMotionRegistrationFilter<InternalImageType,InternalImageType,DeformationFieldType> DeformableRegistrationFilterType;
 typedef itk::VersorRigid3DTransformOptimizer OptimizerType;
-//typedef const OptimizerType *OptimizerPointer;
 
 //////////////////////////
-
 
 //  The following section of code implements a Command observer
 //  that will monitor the evolution of the registration process.
@@ -83,21 +69,21 @@ public:
       std::cout << optimizer->GetValue() << "   ";
       std::cout << optimizer->GetCurrentPosition() << std::endl;
     } 
-
 	}
+
 };
 
 
 
 //////////////////////////
 
-void RigidRegistration(DeformationFieldType::Pointer& deformationField, FixedImageType::ConstPointer fixedImage, MovingImageType::ConstPointer movingImage, int maxNumberOfIterations=200)
+void RigidRegistration(DeformationFieldType::Pointer& deformationField, ExternalImageType::ConstPointer fixedImage, ExternalImageType::ConstPointer movingImage, int maxNumberOfIterations=200)
 {
 
   typedef itk::VersorRigid3DTransform<double> TransformType;
-  typedef itk::MeanSquaresImageToImageMetric<FixedImageType,MovingImageType> MetricType;
-  typedef itk::LinearInterpolateImageFunction<MovingImageType,double> InterpolatorType;
-  typedef itk::ImageRegistrationMethod<FixedImageType,MovingImageType> RigidRegistrationFilterType;
+  typedef itk::MeanSquaresImageToImageMetric<ExternalImageType,ExternalImageType> MetricType;
+  typedef itk::LinearInterpolateImageFunction<ExternalImageType,double> InterpolatorType;
+  typedef itk::ImageRegistrationMethod<ExternalImageType,ExternalImageType> RigidRegistrationFilterType;
 
   MetricType::Pointer         metric        = MetricType::New();
   OptimizerType::Pointer      optimizer     = OptimizerType::New();
@@ -116,7 +102,7 @@ void RigidRegistration(DeformationFieldType::Pointer& deformationField, FixedIma
 
   registration->SetFixedImageRegion(fixedImage->GetBufferedRegion() );
 
-  typedef itk::CenteredTransformInitializer<TransformType, FixedImageType, MovingImageType>  TransformInitializerType;
+  typedef itk::CenteredTransformInitializer<TransformType, ExternalImageType, ExternalImageType>  TransformInitializerType;
 
   TransformInitializerType::Pointer initializer = TransformInitializerType::New();
 
@@ -213,48 +199,7 @@ void RigidRegistration(DeformationFieldType::Pointer& deformationField, FixedIma
   std::cout << "Matrix = " << std::endl << matrix << std::endl;
   std::cout << "Offset = " << std::endl << offset << std::endl;
 
-  /*
-  typedef itk::ResampleImageFilter<MovingImageType, FixedImageType>    ResampleFilterType;
-
-  TransformType::Pointer finalTransform = TransformType::New();
-
-  finalTransform->SetCenter( transform->GetCenter() );
-
-  finalTransform->SetParameters( finalParameters );
-  finalTransform->SetFixedParameters( transform->GetFixedParameters() );
-
-  ResampleFilterType::Pointer resampler = ResampleFilterType::New();
-
-  resampler->SetTransform( finalTransform );
-  resampler->SetInput( movingImageReader->GetOutput() );
-
-  FixedImageType::Pointer fixedImage = fixedImageReader->GetOutput();
-
-  resampler->SetSize(    fixedImage->GetLargestPossibleRegion().GetSize() );
-  resampler->SetOutputOrigin(  fixedImage->GetOrigin() );
-  resampler->SetOutputSpacing( fixedImage->GetSpacing() );
-  resampler->SetOutputDirection( fixedImage->GetDirection() );
-  resampler->SetDefaultPixelValue( 100 );
-  
-  typedef  unsigned char  OutputPixelType;
-
-  typedef itk::Image< OutputPixelType, ImageDimension > OutputImageType;
-  
-  typedef itk::CastImageFilter<FixedImageType,OutputImageType > CastFilterType;
-                    
-  typedef itk::ImageFileWriter< OutputImageType >  WriterType;
-
-  WriterType::Pointer      writer =  WriterType::New();
-  CastFilterType::Pointer  caster =  CastFilterType::New();
-
-  writer->SetFileName( argv[3] );
-
-  caster->SetInput( resampler->GetOutput() );
-  writer->SetInput( caster->GetOutput()   );
-  writer->Update();
-*/
-
-    // Generate the explicit deformation field resulting from 
+  // Generate the explicit deformation field resulting from 
   // the registration.
 
   typedef itk::Image< VectorPixelType, ImageDimension >  DeformationFieldType;
@@ -289,10 +234,10 @@ void RigidRegistration(DeformationFieldType::Pointer& deformationField, FixedIma
   
  }
 
-void DeformableRegistration(DeformationFieldType::Pointer& deformationField, FixedImageType::ConstPointer fixedImage, MovingImageType::ConstPointer movingImage, int maxNumberOfIterations=30, double gradientSmoothingStandardDeviations=0)
+void DeformableRegistration(DeformationFieldType::Pointer& deformationField, ExternalImageType::ConstPointer fixedImage, ExternalImageType::ConstPointer movingImage, int maxNumberOfIterations=30, double gradientSmoothingStandardDeviations=0)
 {
-	typedef itk::CastImageFilter<OutputImageType, InternalImageType > FixedImageCasterType;
-	typedef itk::CastImageFilter<OutputImageType, InternalImageType > MovingImageCasterType;
+	typedef itk::CastImageFilter<ExternalImageType, InternalImageType > FixedImageCasterType;
+	typedef itk::CastImageFilter<ExternalImageType, InternalImageType > MovingImageCasterType;
 
 	FixedImageCasterType::Pointer fixedImageCaster   = FixedImageCasterType::New();
 	MovingImageCasterType::Pointer movingImageCaster = MovingImageCasterType::New();
@@ -363,7 +308,7 @@ int main( int argc, char * argv[] )
 
 	// Read images
 
-	FixedReaderType::Pointer fixedReader = FixedReaderType::New();
+	ExternalImageReaderType::Pointer fixedReader = ExternalImageReaderType::New();
 	fixedReader->SetFileName( fixedImageFilename );
 	try
 	{
@@ -375,9 +320,9 @@ int main( int argc, char * argv[] )
 		std::cerr << excp << std::endl;
 		return EXIT_FAILURE;
 	}
-	FixedImageType::ConstPointer fixedImage = fixedReader->GetOutput();
+	ExternalImageType::ConstPointer fixedImage = fixedReader->GetOutput();
 
-	MovingReaderType::Pointer movingReader = MovingReaderType::New();
+	ExternalImageReaderType::Pointer movingReader = ExternalImageReaderType::New();
 	movingReader->SetFileName( movingImageFilename );
 	try
 	{
@@ -389,7 +334,7 @@ int main( int argc, char * argv[] )
 		std::cerr << excp << std::endl;
 		return EXIT_FAILURE;
 	}
-	MovingImageType::ConstPointer movingImage = movingReader->GetOutput();
+	ExternalImageType::ConstPointer movingImage = movingReader->GetOutput();
 
   bool needDeformationField=false;
   if (!outputDeformationFieldFilename.empty())
@@ -429,11 +374,11 @@ int main( int argc, char * argv[] )
   if (deformationField.IsNotNull() && !outputRegisteredImageFilename.empty())
 	{
 		//create the filter that applies the deformation
-		typedef itk::WarpImageFilter<OutputImageType, OutputImageType, DeformationFieldType>  WarpImageFilterType;
+		typedef itk::WarpImageFilter<ExternalImageType, ExternalImageType, DeformationFieldType>  WarpImageFilterType;
 		WarpImageFilterType::Pointer warpFilter = WarpImageFilterType::New();
 
 		//use linear interpolation method for float-valued outputs of the deformation
-		typedef itk::LinearInterpolateImageFunction<OutputImageType, double>  InterpolatorType;
+		typedef itk::LinearInterpolateImageFunction<ExternalImageType, double>  InterpolatorType;
 		InterpolatorType::Pointer interpolator = InterpolatorType::New();
 
 		warpFilter->SetInterpolator(interpolator);
@@ -454,7 +399,7 @@ int main( int argc, char * argv[] )
 			exit(-1);
 		}
 
-		typedef   itk::ImageFileWriter< MovingImageType >  MovingWriterType;
+		typedef   itk::ImageFileWriter< ExternalImageType >  MovingWriterType;
 		MovingWriterType::Pointer movingWriter = MovingWriterType::New();
 		movingWriter->SetFileName( outputRegisteredImageFilename );
 		movingWriter->SetInput(warpFilter->GetOutput());

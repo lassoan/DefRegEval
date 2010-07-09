@@ -15,29 +15,29 @@
 int main( int argc, char * argv[] )
 {
 
-	std::string deformationReferenceFilename = "deformationRef.mha";
-	std::string deformationComputedFilename = "deformationComputed.mha";
-	std::string maskFilename;
+  std::string deformationReferenceFilename = "deformationRef.mha";
+  std::string deformationComputedFilename = "deformationComputed.mha";
+  std::string maskFilename;
   std::string deformationDiffVectorFilename;
   std::string deformationDiffMagFilename;
 
-	vtksys::CommandLineArguments args;
-	args.Initialize(argc, argv);
+  vtksys::CommandLineArguments args;
+  args.Initialize(argc, argv);
 
-	args.AddArgument("--deformationReference", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &deformationReferenceFilename, "Ground truth deformation field image");
-	args.AddArgument("--deformationComputed", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &deformationComputedFilename, "Computed deformation field image");
+  args.AddArgument("--deformationReference", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &deformationReferenceFilename, "Ground truth deformation field image");
+  args.AddArgument("--deformationComputed", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &deformationComputedFilename, "Computed deformation field image");
 
   args.AddArgument("--mask", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &maskFilename, "Binary mask that will be applied on the output (all voxels where the mask is 0 will be 0)");  
   args.AddArgument("--deformationDifferenceVector", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &deformationDiffVectorFilename, "Deformation field error (computed-ref)");
   args.AddArgument("--deformationDifferenceMagnitude", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &deformationDiffMagFilename, "Magnitude of deformation field error (computed-ref)");
 
-	
-	if ( !args.Parse() )
-	{
-		std::cerr << "Problem parsing arguments" << std::endl;
-		std::cout << "Help: " << args.GetHelp() << std::endl;
-		exit(EXIT_FAILURE);
-	}
+
+  if ( !args.Parse() )
+  {
+    std::cerr << "Problem parsing arguments" << std::endl;
+    std::cout << "Help: " << args.GetHelp() << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   static const unsigned int  ImageDimension = 3;
   typedef float  InternalPixelType;
@@ -48,35 +48,35 @@ int main( int argc, char * argv[] )
 
   typedef itk::ImageFileReader< DeformationFieldType  > DefImageReaderType;
 
-	DefImageReaderType::Pointer defRefReader = DefImageReaderType::New();
-	defRefReader->SetFileName( deformationReferenceFilename );
-	try
-	{
-		defRefReader->Update();
-	}
-	catch( itk::ExceptionObject & excp )
-	{
-		std::cerr << "Exception thrown " << std::endl;
-		std::cerr << excp << std::endl;
-		return EXIT_FAILURE;
-	}
+  DefImageReaderType::Pointer defRefReader = DefImageReaderType::New();
+  defRefReader->SetFileName( deformationReferenceFilename );
+  try
+  {
+    defRefReader->Update();
+  }
+  catch( itk::ExceptionObject & excp )
+  {
+    std::cerr << "Exception thrown " << std::endl;
+    std::cerr << excp << std::endl;
+    return EXIT_FAILURE;
+  }
 
-	DefImageReaderType::Pointer defCompReader = DefImageReaderType::New();
-	defCompReader->SetFileName( deformationComputedFilename );
-	try
-	{
-		defCompReader->Update();
-	}
-	catch( itk::ExceptionObject & excp )
-	{
-		std::cerr << "Exception thrown " << std::endl;
-		std::cerr << excp << std::endl;
-		return EXIT_FAILURE;
-	}
+  DefImageReaderType::Pointer defCompReader = DefImageReaderType::New();
+  defCompReader->SetFileName( deformationComputedFilename );
+  try
+  {
+    defCompReader->Update();
+  }
+  catch( itk::ExceptionObject & excp )
+  {
+    std::cerr << "Exception thrown " << std::endl;
+    std::cerr << excp << std::endl;
+    return EXIT_FAILURE;
+  }
 
   // Compute the difference between the reference and computed deformation field
   typedef itk::SubtractImageFilter<DeformationFieldType, DeformationFieldType, DeformationFieldType> SubtractFilterType;
-	SubtractFilterType::Pointer subtractFilter = SubtractFilterType::New();
+  SubtractFilterType::Pointer subtractFilter = SubtractFilterType::New();
   subtractFilter->SetInput1(defCompReader->GetOutput());
   subtractFilter->SetInput2(defRefReader->GetOutput());
   subtractFilter->Update();
@@ -124,7 +124,7 @@ int main( int argc, char * argv[] )
     ThresholdFilterType::Pointer thresholdFilter = ThresholdFilterType::New();    
     thresholdFilter->SetInput(erodeFilter->GetOutput());
 
-erodeFilter->SetInput( maskReader->GetOutput() );
+    erodeFilter->SetInput( maskReader->GetOutput() );
 
     thresholdFilter->SetOutsideValue(0);
     thresholdFilter->ThresholdBelow(0);
@@ -178,8 +178,5 @@ erodeFilter->SetInput( maskReader->GetOutput() );
     }
   }
 
-  
-
-
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

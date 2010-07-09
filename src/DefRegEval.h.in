@@ -13,10 +13,18 @@
 #include "itkImageFileWriter.h" 
 
 static const unsigned int  ImageDimension = 3;
+
 typedef float  InternalImagePixelType;
 typedef itk::Image <InternalImagePixelType, ImageDimension> InternalImageType;
 typedef itk::ImageFileReader< InternalImageType  > InternalImageReaderType;
 
+typedef itk::Vector<InternalImagePixelType, ImageDimension> VectorPixelType;
+typedef itk::Image<VectorPixelType,  ImageDimension> DeformationFieldType;
+
+typedef unsigned char  ExternalImagePixelType;
+typedef itk::Image <ExternalImagePixelType, ImageDimension> ExternalImageType;
+typedef itk::ImageFileReader<ExternalImageType> ExternalImageReaderType;
+typedef itk::ImageFileWriter<ExternalImageType> ExternalImageWriterType;
 
 class DefRegEvalGlobal
 {
