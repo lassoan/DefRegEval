@@ -5,6 +5,7 @@
 #include "itkAddImageFilter.h"
 #include "itkSubtractImageFilter.h"
 
+#include "vtkOutputWindow.h" 
 #include "vtkSmartPointer.h"
 #include "vtkXMLUnstructuredGridWriter.h" 
 #include "vtkUnstructuredGridWriter.h"
@@ -207,6 +208,7 @@ static const char* ARRAY_NAME_MATERIAL="material";
 
 int main(int argc, char *argv[])
 {
+  VTK_LOG_TO_CONSOLE;
 
   std::string inputObjectFilename = "object-volumemesh.vol";
   std::string inputSupportFilename = "support-volumemesh.vol";

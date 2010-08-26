@@ -2,6 +2,7 @@
 
 #include "DefRegEval.h"
 
+#include "vtkOutputWindow.h"
 #include "vtkSmartPointer.h"
 #include "vtkMetaImageReader.h"
 #include "vtkContourFilter.h"
@@ -39,13 +40,15 @@ void SetMaterial(vtkPolyData *poly, int materialId)
 
 int main(int argc, char *argv[])
 {
-  std::string outputCombinedSurfaceMeshFilename = "extracted-surfaces.smesh";
-  std::string inputImageFilename = "object-image.mha";
+  VTK_LOG_TO_CONSOLE;
+
+  std::string outputCombinedSurfaceMeshFilename;
+  std::string inputImageFilename;
   std::string outputObjectSurfaceFilename;
   std::string outputObjectImageFilename;
   std::string outputSupportSurfaceFilename;
-  vtkstd::vector<double> supportPosition; // {67, 71, 36} LPS
-  double supportRadius=40; // 40 mm
+  vtkstd::vector<double> supportPosition; // LPS
+  double supportRadius=40; // mm
   double objectSegmentationThreshold=0; // Threshold for surface extraction
 
 
@@ -75,6 +78,14 @@ int main(int argc, char *argv[])
     std::cerr << "Invalid supportPosition " << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  if (inputImageFilename.empty())
+  {
+    std::cerr << "OrganImageInputFn parameter is required" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::cout << "Parsing OK, input image filename: " << inputImageFilename << std::endl;
 
   /////////////
 
@@ -127,35 +138,38 @@ int main(int argc, char *argv[])
     writer->SetInput(supportVolumeNormals->GetOutput());
     writer->SetFileName(outputSupportSurfaceFilename.c_str());
     writer->Update();
-  }
-
-  vtkPolyData *organPoly=vtkPolyData::SafeDownCast(objectSurfaceNormals->GetOutput());
-  vtkPolyData *supportPoly=vtkPolyData::SafeDownCast(supportVolumeNormals->GetOutput());
+  }  
 
   // Write combined mesh
+  if (!outputCombinedSurfaceMeshFilename.empty())
+  {
+    cout << "Writing combined mesh to " << outputCombinedSurfaceMeshFilename << std::endl;
+    vtkPolyData *organPoly=vtkPolyData::SafeDownCast(objectSurfaceNormals->GetOutput());
+    vtkPolyData *supportPoly=vtkPolyData::SafeDownCast(supportVolumeNormals->GetOutput());
 
-  vtkSmartPointer<vtkSMeshWriter> writer=vtkSmartPointer<vtkSMeshWriter>::New();
-  writer->SetFileName(outputCombinedSurfaceMeshFilename.c_str());
+    vtkSmartPointer<vtkSMeshWriter> writer=vtkSmartPointer<vtkSMeshWriter>::New();
+    writer->SetFileName(outputCombinedSurfaceMeshFilename.c_str());
 
-  vtkSmartPointer<vtkAppendPolyData> polyAppender=vtkSmartPointer<vtkAppendPolyData>::New();
+    vtkSmartPointer<vtkAppendPolyData> polyAppender=vtkSmartPointer<vtkAppendPolyData>::New();
 
-  SetMaterial(organPoly, DefRegEvalGlobal::OrganMaterialId);
-  polyAppender->AddInput( organPoly ); 
-  // need to specify a position within the organ, we assuem that the center of the support
-  // is within the organ
-  // :TODO: compute point from the organPoly
-  double organPoint[3]={supportPosition[0],supportPosition[1],supportPosition[2]};
-  writer->AddRegion("organ", organPoint, DefRegEvalGlobal::OrganMaterialId);
+    SetMaterial(organPoly, DefRegEvalGlobal::OrganMaterialId);
+    polyAppender->AddInput( organPoly ); 
+    // need to specify a position within the organ, we assuem that the center of the support
+    // is within the organ
+    // :TODO: compute point from the organPoly
+    double organPoint[3]={supportPosition[0],supportPosition[1],supportPosition[2]};
+    writer->AddRegion("organ", organPoint, DefRegEvalGlobal::OrganMaterialId);
 
-  SetMaterial(supportPoly, DefRegEvalGlobal::SupportMaterialId);
-  polyAppender->AddInput( supportPoly ); 
-  // need to specify a position within support region (not within the organ)
-  double supportPoint[3]={supportPosition[0],supportPosition[1]+supportRadius*0.95,supportPosition[2]};
-  writer->AddRegion("support", supportPoint, DefRegEvalGlobal::SupportMaterialId);
+    SetMaterial(supportPoly, DefRegEvalGlobal::SupportMaterialId);
+    polyAppender->AddInput( supportPoly ); 
+    // need to specify a position within support region (not within the organ)
+    double supportPoint[3]={supportPosition[0],supportPosition[1]+supportRadius*0.95,supportPosition[2]};
+    writer->AddRegion("support", supportPoint, DefRegEvalGlobal::SupportMaterialId);
 
-  writer->SetInputConnection(polyAppender->GetOutputPort());      
-  writer->Update();
-  writer->Write();
+    writer->SetInputConnection(polyAppender->GetOutputPort());      
+    writer->Update();
+    writer->Write();
+  }
 
   if (!outputObjectImageFilename.empty())
   {

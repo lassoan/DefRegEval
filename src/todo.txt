@@ -15,3 +15,5 @@
 * Remove netgen mesh reader?
 
 * Update examples/tests (have a few surface and image based registration tests)
+
+* Configure FEBio make to allow use of PARDISO solver (through intel MKL or directly the PARDISO library)

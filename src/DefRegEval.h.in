@@ -40,4 +40,8 @@ public:
 	static const int SupportedDimension;
 };
 
+// Change VTK logging to force use console for output (even on Windows)
+#define VTK_LOG_TO_CONSOLE { class vtkConsoleOutputWindow : public vtkOutputWindow { public: static vtkConsoleOutputWindow* New() { return new vtkConsoleOutputWindow; } }; \
+  vtkOutputWindow::SetInstance(vtkSmartPointer<vtkConsoleOutputWindow>::New()); };
+
 #endif // __DefRegEval_h
