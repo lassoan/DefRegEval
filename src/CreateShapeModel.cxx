@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
   //and generate distance map for each
   InternalImageReaderType::Pointer  imageReader  = InternalImageReaderType::New();
   for (int i=0; i<fileNames.size(); i++)
-  {	
+  {  
     std::cout<<"reading aligned shape: "<<fileNames.at(i)<<std::endl;
     imageReader->SetFileName(fileNames.at(i).c_str());
     DistanceMapFilterType::Pointer filterDaniel = DistanceMapFilterType::New();
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  //create directory for output		
+  //create directory for output    
   vtksys::SystemTools::MakeDirectory(outputShapeModelDir.c_str());
 
   typedef itk::ImageFileWriter< InternalImageType >  WriterType;
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
   //output distance map of mean shape
   InternalImageType::Pointer meanShape = shapeEstimator->GetOutput(0);
   std::string meanShapeDistanceMapFile = outputShapeModelDir;
-  meanShapeDistanceMapFile.append("\\MeanShape_DMap.mha");
+  meanShapeDistanceMapFile.append("/MeanShape_DMap.mha");
   writer->SetFileName(meanShapeDistanceMapFile.c_str());  
   writer->SetInput(meanShape);
   writer->Update();
@@ -149,9 +149,16 @@ int main(int argc, char *argv[])
   std::cout<<"generating contour of mean shape"<<std::endl;
   //this is still signed distance map, need a contour
 
+#if defined(_WIN32)
   typedef itk::UnaryFunctorImageFilter<
     InternalImageType,OutputImageType,
     ContourOfSignedDistanceMapFunctor<typename InternalImageType::PixelType> > ContourExtractorType;
+#else
+  typedef itk::UnaryFunctorImageFilter<
+    InternalImageType,OutputImageType,
+    ContourOfSignedDistanceMapFunctor<InternalImageType::PixelType> > ContourExtractorType;
+#endif
+
   ContourExtractorType::Pointer contourExtractor = ContourExtractorType::New();
   contourExtractor->SetInput(meanShape);
   contourExtractor->Update();
@@ -160,7 +167,7 @@ int main(int argc, char *argv[])
   BinaryWriterType::Pointer binaryWriter = BinaryWriterType::New();
   binaryWriter->SetUseCompression(true);
   std::string meanShapeFile = outputShapeModelDir;
-  meanShapeFile.append("\\MeanShape.mha");
+  meanShapeFile.append("/MeanShape.mha");
   binaryWriter->SetFileName(meanShapeFile.c_str());
   binaryWriter->SetInput(MeanImageContour);
   binaryWriter->Update();
@@ -170,11 +177,11 @@ int main(int argc, char *argv[])
   char *Suffix = new char[20]; 
   //store modes of variation
   for (int mode=1; mode<=NUMBER_OF_EIGEN_MODES; mode++)
-  {	
+  {  
     //form the file name
     sprintf(Suffix, "%02d.mha", mode);
     std::string variationModeFile = outputShapeModelDir;
-    variationModeFile.append("\\VariationMode_");
+    variationModeFile.append("/VariationMode_");
     variationModeFile.append(Suffix);
     writer->SetFileName(variationModeFile.c_str());
     writer->SetInput(shapeEstimator->GetOutput(mode));
@@ -188,8 +195,8 @@ int main(int argc, char *argv[])
   eigenValues = shapeEstimator->GetEigenValues();
   std::cout<<"storing eigenvalues"<<std::endl<<std::endl;
   std::string eigenValueFilePath = outputShapeModelDir;
-  eigenValueFilePath.append("\\eigenValues.txt");
-  std::ofstream eigenValueFile(eigenValueFilePath.c_str());
+  eigenValueFilePath.append("/eigenValues.txt");
+  std::ofstream eigenValueFile(eigenValueFilePath.c_str(), std::ios_base::binary | std::ios_base::out ); // binary, to force LF line ending (otherwise file compare would fail during testing)
   if (!eigenValueFile.is_open())
   {
     std::cerr << "Fatal Error: Could not store eigenvalues" << std::endl;

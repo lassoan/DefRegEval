@@ -19,7 +19,7 @@ proc GenerateShapeImage { outputFn } {
 proc CreateVolumeMesh { inputFn outputFn } {
   log "CreateVolumeMesh"
   set startTime "[clock seconds]"
-	set ::env(TCL_LIBRARY) $::netGenDir/lib/tcl8.3
+  set ::env(TCL_LIBRARY) $::netGenDir/lib/tcl8.3
   set ::env(TIX_LIBRARY) $::netGenDir/lib/tix8.2
   set result [ catch {exec "$::netGenDir/ng431.exe" -geofile=$inputFn -meshfile=$outputFn -fine -batchmode} ]
   if {$result} {

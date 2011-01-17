@@ -35,11 +35,14 @@
 vtkCxxRevisionMacro(vtkFEBioWriter, "$Revision: 1.43 $");
 vtkStandardNewMacro(vtkFEBioWriter);
 
+static const double END_TIME=1.0;
+static const double UNIT_LOAD=1.0;
+
+
 vtkFEBioWriter::vtkFEBioWriter() 
 {
   this->Title=NULL;
   SetTitle("untitled");
-  this->StepSize=0.2;
   this->MaxRefs=15;
   this->MaxUps=10;
   this->DTol=0.001;
@@ -47,7 +50,7 @@ vtkFEBioWriter::vtkFEBioWriter()
   this->RTol=0;
   this->LsTol=0.9;
   this->PressureStiffness=1;
-  this->NumberOfTimeSteps=10;
+  this->NumberOfTimeSteps=5;
   this->DtMin=0.01;
   this->TMax=1.0;
   this->MaxRetries=5;
@@ -77,7 +80,11 @@ void vtkFEBioWriter::WriteData()
       {
       vtkErrorMacro("Ran out of disk space; deleting file: "<< this->FileName);
       this->CloseVTKFile(fp);
+#if defined(_WIN32)
       _unlink(this->FileName);
+#else
+      unlink(this->FileName);
+#endif
       }
     return;
     }
@@ -123,7 +130,7 @@ bool vtkFEBioWriter::WriteControl(ostream* fp)
   *fp << "<Control>" << vtkstd::endl;  
   *fp << "  <title>" << this->Title << "</title>" << vtkstd::endl;  
   *fp << "  <time_steps>"<<this->NumberOfTimeSteps<<"</time_steps>" << vtkstd::endl;  
-  *fp << "  <step_size>"<<this->StepSize<<"</step_size>" << vtkstd::endl;  
+  *fp << "  <step_size>"<<END_TIME/this->NumberOfTimeSteps<<"</step_size>" << vtkstd::endl;  
   *fp << "  <max_refs>"<<this->MaxRefs<<"</max_refs>" << vtkstd::endl;  
   *fp << "  <max_ups>"<<this->MaxUps<<"</max_ups>" << vtkstd::endl;  
   *fp << "  <dtol>"<<this->DTol<<"</dtol>" << vtkstd::endl;  
@@ -149,9 +156,9 @@ bool vtkFEBioWriter::WriteMaterial(ostream* fp)
 
   // material id-s are 1-based in the file and 0-based in VTK
   *fp << "  <material id=\"" << this->OrganMaterialId+1 << "\" name=\"OrganTissue\" type=\"linear elastic\">" << vtkstd::endl;
-	*fp << "    <E>21</E>" << vtkstd::endl;
+  *fp << "    <E>21</E>" << vtkstd::endl;
   *fp << "    <v>0.45</v>" << vtkstd::endl;
-	*fp << "  </material>" << vtkstd::endl;
+  *fp << "  </material>" << vtkstd::endl;
 
   // material id-s are 1-based in the file and 0-based in VTK
   *fp << "  <material id=\"" << this->SupportMaterialId+1 << "\" name=\"SupportTissue\" type=\"linear elastic\">" << vtkstd::endl;
@@ -159,7 +166,7 @@ bool vtkFEBioWriter::WriteMaterial(ostream* fp)
   *fp << "    <v>0.3</v>" << vtkstd::endl;
   *fp << "  </material>" << vtkstd::endl;
 
-	*fp << "</Material>" << vtkstd::endl;
+  *fp << "</Material>" << vtkstd::endl;
 
   return true;
 }
@@ -370,8 +377,8 @@ bool vtkFEBioWriter::WriteLoadData(ostream* fp)
     case BoundaryCondition::FORCE:
       *fp << "<loadcurve id=\""<<loadCurveId+1<<"\">" << vtkstd::endl;
       *fp << "<loadpoint>0,0</loadpoint>" << vtkstd::endl;
-      *fp << "<loadpoint>1,1</loadpoint>" << vtkstd::endl;
-      *fp << "</loadcurve>" << vtkstd::endl;	
+      *fp << "<loadpoint>" << END_TIME <<"," << UNIT_LOAD << "</loadpoint>" << vtkstd::endl;
+      *fp << "</loadcurve>" << vtkstd::endl;  
       loadCurveId++;
       break;
     }

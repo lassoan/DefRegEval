@@ -40,7 +40,9 @@ void SetMaterial(vtkPolyData *poly, int materialId)
 
 int main(int argc, char *argv[])
 {
+#if defined(_WIN32)
   VTK_LOG_TO_CONSOLE;
+#endif
 
   std::string outputCombinedSurfaceMeshFilename;
   std::string inputImageFilename;
@@ -190,7 +192,7 @@ int main(int argc, char *argv[])
     // fill the image with zeros
     vtkIdType outIncX, outIncY, outIncZ;
     int *outExt=refImg->GetExtent();
-    refImg->GetContinuousIncrements(outExt, outIncX, outIncY, outIncZ);	
+    refImg->GetContinuousIncrements(outExt, outIncX, outIncY, outIncZ);  
     int rowLength = (outExt[1] - outExt[0]+1)*refImg->GetNumberOfScalarComponents()*refImg->GetScalarSize();
     outIncY = outIncY*refImg->GetScalarSize() + rowLength;
     outIncZ *= refImg->GetScalarSize();
@@ -212,7 +214,7 @@ int main(int argc, char *argv[])
     polyToImage->SetOutputSpacing(refImg->GetSpacing());
     polyToImage->SetOutputOrigin(refImg->GetOrigin());
     polyToImage->SetOutputWholeExtent(refImg->GetExtent());
-    polyToImage->Update();	
+    polyToImage->Update();  
 
     // Convert stencil to image
     vtkSmartPointer<vtkImageStencil> stencil=vtkSmartPointer<vtkImageStencil>::New();

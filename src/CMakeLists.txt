@@ -10,17 +10,17 @@ configure_file(
 INCLUDE_DIRECTORIES ( ${CMAKE_CURRENT_BINARY_DIR} )
  
 ADD_LIBRARY(dreIO
-	IO/vtkLsDynaBinaryPlotReader.cxx 
-	IO/vtkLsDynaBinaryPlotReader.h
-	IO/vtkMeditMeshReader.cxx 
-	IO/vtkMeditMeshReader.h
-	IO/vtkNetgenMeshReader.cxx 
-	IO/vtkNetgenMeshReader.h
-	IO/vtkSMeshWriter.cxx
-	IO/vtkSMeshWriter.h
-	IO/vtkFEBioWriter.cxx 
-	IO/vtkFEBioWriter.h
-	)
+  IO/vtkLsDynaBinaryPlotReader.cxx 
+  IO/vtkLsDynaBinaryPlotReader.h
+  IO/vtkMeditMeshReader.cxx 
+  IO/vtkMeditMeshReader.h
+  IO/vtkNetgenMeshReader.cxx 
+  IO/vtkNetgenMeshReader.h
+  IO/vtkSMeshWriter.cxx
+  IO/vtkSMeshWriter.h
+  IO/vtkFEBioWriter.cxx 
+  IO/vtkFEBioWriter.h
+  )
 
 ##########################
 

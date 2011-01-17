@@ -229,7 +229,7 @@ int vtkLsDynaBinaryPlotReader::RequestInformation(
 //----------------------------------------------------------------------------
 void vtkLsDynaBinaryPlotReader::ReadNodePoints(vtkUnstructuredGrid *output, FILE* fp, const FileHeaderType &fh)
 {  
-  // read the node coordinates	
+  // read the node coordinates  
   const int numberOfComponents=3; // coordinates are always in 3D
   int numValues=fh.nump*numberOfComponents;
 

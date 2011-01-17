@@ -143,7 +143,7 @@
   #define REAL float
 #else
   #define REAL double
-#endif 	// not defined SINGLE
+#endif   // not defined SINGLE
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //

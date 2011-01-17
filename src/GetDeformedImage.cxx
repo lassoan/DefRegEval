@@ -36,7 +36,7 @@ void ExtractOrganData(vtkUnstructuredGrid* organGrid, vtkUnstructuredGrid* ugrid
 
   // copy only organ material cells
   vtkCellArray *cells = ugrid->GetCells();
-  cells->InitTraversal();	
+  cells->InitTraversal();  
   vtkIdType npts, *pts;
   int cell=-1;
   vtkSmartPointer<vtkIdList> organCells=vtkSmartPointer<vtkIdList>::New();    
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 
     vtkSmartPointer<vtkXMLUnstructuredGridWriter> xmlGridWriter=vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
     xmlGridWriter->SetInput(organGrid);  
-    xmlGridWriter->SetFileName(outputVolumeMeshFilename.c_str());		
+    xmlGridWriter->SetFileName(outputVolumeMeshFilename.c_str());    
     xmlGridWriter->Update();
   }
 
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
   surface->Allocate();
 
   vtkCellArray *cells = organGrid->GetCells();
-  cells->InitTraversal();	
+  cells->InitTraversal();  
   vtkIdType tri1[3];
   vtkIdType tri2[3];
   vtkIdType tri3[3];
@@ -181,11 +181,11 @@ int main(int argc, char *argv[])
   refImageReader->Update();
   // copy the reference image
   vtkSmartPointer<vtkImageData> refImg=vtkSmartPointer<vtkImageData>::New();
-  refImg->DeepCopy(vtkImageData::SafeDownCast(refImageReader->GetOutput()));	
+  refImg->DeepCopy(vtkImageData::SafeDownCast(refImageReader->GetOutput()));  
   // fill the image with zeros
   vtkIdType outIncX, outIncY, outIncZ;
   int *outExt=refImg->GetExtent();
-  refImg->GetContinuousIncrements(outExt, outIncX, outIncY, outIncZ);	
+  refImg->GetContinuousIncrements(outExt, outIncX, outIncY, outIncZ);  
   int rowLength = (outExt[1] - outExt[0]+1)*refImg->GetNumberOfScalarComponents()*refImg->GetScalarSize();
   outIncY = outIncY*refImg->GetScalarSize() + rowLength;
   outIncZ *= refImg->GetScalarSize();
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
   polyToImage->SetOutputSpacing(refImg->GetSpacing());
   polyToImage->SetOutputOrigin(refImg->GetOrigin());
   polyToImage->SetOutputWholeExtent(refImg->GetExtent());
-  polyToImage->Update();	
+  polyToImage->Update();  
 
   // Convert stencil to image
   vtkSmartPointer<vtkImageStencil> stencil=vtkSmartPointer<vtkImageStencil>::New();
@@ -246,11 +246,11 @@ int main(int argc, char *argv[])
     while(pd->GetNumberOfArrays()>1)
     {
       if (strcmp(pd->GetArrayName(0),plotReader->GetArrayNameDisplacement())!=0)
-      {				
+      {        
         pd->RemoveArray(pd->GetArrayName(0));
       }
       if (strcmp(pd->GetArrayName(1),plotReader->GetArrayNameDisplacement())!=0)
-      {				
+      {        
         pd->RemoveArray(pd->GetArrayName(1));
       }
     }
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
     //fill the ref image with zeros
     vtkIdType outIncX, outIncY, outIncZ;
     int *outExt=refImg->GetExtent();
-    refImg->GetContinuousIncrements(outExt, outIncX, outIncY, outIncZ);	
+    refImg->GetContinuousIncrements(outExt, outIncX, outIncY, outIncZ);  
     int rowLength = (outExt[1] - outExt[0]+1)*refImg->GetNumberOfScalarComponents()*refImg->GetScalarSize();
     outIncY = outIncY*refImg->GetScalarSize() + rowLength;
     outIncZ *= refImg->GetScalarSize();
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 
     vtkSmartPointer<vtkProbeFilter> probeFilter=vtkSmartPointer<vtkProbeFilter>::New();
     probeFilter->SetInput(nonZeroImg);
-    probeFilter->SetSource(organGrid);	
+    probeFilter->SetSource(organGrid);  
     probeFilter->Update();
 
     refImg->CopyAndCastFrom(vtkImageData::SafeDownCast(probeFilter->GetOutput()), nonZeroImgExtent);
@@ -334,11 +334,11 @@ int main(int argc, char *argv[])
     while(pd->GetNumberOfArrays()>1)
     {
       if (strcmp(pd->GetArrayName(0),plotReader->GetArrayNameDisplacement())!=0)
-      {				
+      {        
         pd->RemoveArray(pd->GetArrayName(0));
       }
       if (strcmp(pd->GetArrayName(1),plotReader->GetArrayNameDisplacement())!=0)
-      {				
+      {        
         pd->RemoveArray(pd->GetArrayName(1));
       }
     }
@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
     //fill the ref image with zeros
     vtkIdType outIncX, outIncY, outIncZ;
     int *outExt=refImg->GetExtent();
-    refImg->GetContinuousIncrements(outExt, outIncX, outIncY, outIncZ);	
+    refImg->GetContinuousIncrements(outExt, outIncX, outIncY, outIncZ);  
     int rowLength = (outExt[1] - outExt[0]+1)*refImg->GetNumberOfScalarComponents()*refImg->GetScalarSize();
     outIncY = outIncY*refImg->GetScalarSize() + rowLength;
     outIncZ *= refImg->GetScalarSize();
@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
 
     vtkSmartPointer<vtkProbeFilter> probeFilter=vtkSmartPointer<vtkProbeFilter>::New();
     probeFilter->SetInput(refImg);
-    probeFilter->SetSource(ugrid);	
+    probeFilter->SetSource(ugrid);  
     probeFilter->Update();
 
     // probeFilter output is the deformation field        

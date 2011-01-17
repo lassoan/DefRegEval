@@ -11549,7 +11549,7 @@ bool tetgenmesh::removeedgebytranNM(REAL *key, int n, triface *abtetlist,
     if ((e1 != (point) NULL) && (e2 != (point) NULL)) {
       // Yes. Skip this face if p[1]<->p[n-1] is not the edge.
       if (!(((p[1] == e1) && (p[n - 1] == e2)) ||
-	    ((p[1] == e2) && (p[n - 1] == e1)))) continue;
+      ((p[1] == e2) && (p[n - 1] == e1)))) continue;
     }
     // Test if face a.b.p_0 can be flipped (by flip23), ie, to check if the
     //   edge p_n-1.p_1 crosses face a.b.p_0 properly.
@@ -16752,14 +16752,14 @@ enum tetgenmesh::locateresult tetgenmesh::sinsertvertex(point insertpt,
   // Delete the old subfaces.
   for (i = 0; i < (int) caveshlist->objects; i++) {
     parysh = (face *) fastlookup(caveshlist, i);
-    if (checksubfaces) {		 
+    if (checksubfaces) {     
       // Disconnect in the neighbor tets.
-      for (j = 0; j < 2; j++) {		 
-        stpivot(*parysh, neightet);		 
-        if (neightet.tet != dummytet) {		 
-          tsdissolve(neightet);		 
-          // symself(neightet);		 
-          // tsdissolve(neightet);		 
+      for (j = 0; j < 2; j++) {     
+        stpivot(*parysh, neightet);     
+        if (neightet.tet != dummytet) {     
+          tsdissolve(neightet);     
+          // symself(neightet);     
+          // tsdissolve(neightet);     
         }
         sesymself(*parysh);
       }
@@ -23686,7 +23686,7 @@ void tetgenmesh::replacepolygonsubs(list* oldshlist, list* newshlist)
         pb = sdest(newsh); 
         for (j = 0; j < oldshlist->len(); j++) {
           oldsh = * (face *)(* oldshlist)[j];
-	  for (l = 0; l < 3; l++) {
+    for (l = 0; l < 3; l++) {
             if (((sorg(oldsh) == pa) && (sdest(oldsh) == pb)) ||
                 ((sorg(oldsh) == pb) && (sdest(oldsh) == pa))) break;
             senextself(oldsh);
@@ -30918,7 +30918,7 @@ void tetgenmesh::highorder()
             hitbdry++;
             if (hitbdry < 2) {
               esym(worktet, spintet);
-	    }
+      }
           }
         }
       }
@@ -30971,7 +30971,7 @@ void tetgenmesh::numberedges()
           if (hitbdry < 2) {
             esym(worktet, spintet);
             fnextself(spintet); // In the same tet.
-	  }
+    }
         }
       }
       // Count this edge if no adjacent tets are smaller than this tet.
@@ -31482,7 +31482,7 @@ void tetgenmesh::outelements(tetgenio* out)
           if (hitbdry < 2) {
             esym(worktet, spintet);
             fnextself(spintet); // In the same tet.
-	  }
+    }
         }
       }
       // Count this edge if no adjacent tets are smaller than this tet.
@@ -32029,7 +32029,7 @@ void tetgenmesh::outedges(tetgenio* out)
           if (hitbdry < 2) {
             esym(worktet, spintet);
             fnextself(spintet); // In the same tet.
-	  }
+    }
         }
       }
       // Count this edge if no adjacent tets are smaller than this tet.
@@ -32530,7 +32530,7 @@ void tetgenmesh::outvoronoi(tetgenio* out)
           if (hitbdry < 2) {
             esym(worktet, spintet);
             fnextself(spintet); // In the same tet.
-	  }
+    }
         }
       }
       // Count this edge if no adjacent tets are smaller than this tet.
@@ -33521,7 +33521,7 @@ int tetgenmesh::checkshells()
         segorg = sorg(testseg);
         segdest = sdest(testseg);
         same = ((shorg == segorg) && (shdest == segdest)) 
-	    || ((shorg == segdest) && (shdest == segorg));
+      || ((shorg == segdest) && (shdest == segorg));
         if (!same) {
           printf("  !! !! Wrong subface-subsegment connection.\n");
           printf("    Subface: ");
@@ -33542,7 +33542,7 @@ int tetgenmesh::checkshells()
         segorg = sorg(testsh);
         segdest = sdest(testsh);
         same = ((shorg == segorg) && (shdest == segdest)) 
-	    || ((shorg == segdest) && (shdest == segorg));
+      || ((shorg == segdest) && (shdest == segorg));
         if (!same) {
           printf("  !! !! Wrong subface-subface connection.\n");
           printf("    Subface 1: ");
@@ -33555,7 +33555,7 @@ int tetgenmesh::checkshells()
         shorg = sorg(testshsh);
         shdest = sdest(testshsh);
         same = ((shorg == segorg) && (shdest == segdest)) 
-	    || ((shorg == segdest) && (shdest == segorg));
+      || ((shorg == segdest) && (shdest == segorg));
         if (!same) {
           printf("  !! !! Wrong subface-subface connection.\n");
           printf("    Subface 1: ");

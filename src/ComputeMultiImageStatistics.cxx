@@ -43,25 +43,25 @@ void readTextLineToListOfString(const char* textFileName, std::vector< std::stri
 int main( int argc, char * argv[] )
 {
 
-	std::string fileListFilename;
+  std::string fileListFilename;
   std::string meanImageFilename;
   std::string maxImageFilename;
   bool vectorImageInput=false;
 
-	vtksys::CommandLineArguments args;
-	args.Initialize(argc, argv);
+  vtksys::CommandLineArguments args;
+  args.Initialize(argc, argv);
 
-	args.AddArgument("--fileList", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &fileListFilename, "Text file with the list of files to be analysed");
+  args.AddArgument("--fileList", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &fileListFilename, "Text file with the list of files to be analysed");
   args.AddArgument("--meanImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &meanImageFilename, "Mean image output");
   args.AddArgument("--maxImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &maxImageFilename, "Max image output");
   args.AddBooleanArgument("--vectorInput", &vectorImageInput, "Set it to true for processing vector images");
-	
-	if ( !args.Parse() )
-	{
-		std::cerr << "Problem parsing arguments" << std::endl;
-		std::cout << "Help: " << args.GetHelp() << std::endl;
-		exit(EXIT_FAILURE);
-	}
+  
+  if ( !args.Parse() )
+  {
+    std::cerr << "Problem parsing arguments" << std::endl;
+    std::cout << "Help: " << args.GetHelp() << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   std::vector< std::string > listOfStrings;
   readTextLineToListOfString(fileListFilename.c_str(), listOfStrings);
@@ -94,33 +94,33 @@ int main( int argc, char * argv[] )
     numberOfImages++;
     if (!vectorImageInput)
     {
-	    scalarImageReader->SetFileName( *it );
-	    try
-	    {
-  		  scalarImageReader->Update();
-  	  }
-	    catch( itk::ExceptionObject & excp )
-	    {
-		    std::cerr << "Exception thrown " << std::endl;
-		    std::cerr << excp << std::endl;
-		    return EXIT_FAILURE;
-	    }
+      scalarImageReader->SetFileName( *it );
+      try
+      {
+        scalarImageReader->Update();
+      }
+      catch( itk::ExceptionObject & excp )
+      {
+        std::cerr << "Exception thrown " << std::endl;
+        std::cerr << excp << std::endl;
+        return EXIT_FAILURE;
+      }
       scalarImageReader->Update(); 
       readImage=scalarImageReader->GetOutput();
     }
     else
     {
       vectorImageReader->SetFileName( *it );
-	    try
-	    {
-  		  vectorImageReader->Update();
-  	  }
-	    catch( itk::ExceptionObject & excp )
-	    {
-		    std::cerr << "Exception thrown " << std::endl;
-		    std::cerr << excp << std::endl;
-		    return EXIT_FAILURE;
-	    }
+      try
+      {
+        vectorImageReader->Update();
+      }
+      catch( itk::ExceptionObject & excp )
+      {
+        std::cerr << "Exception thrown " << std::endl;
+        std::cerr << excp << std::endl;
+        return EXIT_FAILURE;
+      }
       magnitudeFilter->SetInput(vectorImageReader->GetOutput());
       magnitudeFilter->Update(); 
       readImage=magnitudeFilter->GetOutput();
@@ -141,7 +141,7 @@ int main( int argc, char * argv[] )
       duplicator->SetInputImage( meanAccumulatorImage );
       duplicator->Update();
       typedef itk::AddImageFilter<ScalarImageType,ScalarImageType,ScalarImageType> AddFilterType;
-	    AddFilterType::Pointer addFilter = AddFilterType::New();
+      AddFilterType::Pointer addFilter = AddFilterType::New();
       addFilter->SetInput1(duplicator->GetOutput());
       addFilter->SetInput2(readImage);
       addFilter->Update();
@@ -163,7 +163,7 @@ int main( int argc, char * argv[] )
       duplicator->SetInputImage( maxAccumulatorImage );
       duplicator->Update();
       typedef itk::MaximumImageFilter< ScalarImageType, ScalarImageType, ScalarImageType  > MaxFilterType;
-	    MaxFilterType::Pointer maxFilter = MaxFilterType::New();
+      MaxFilterType::Pointer maxFilter = MaxFilterType::New();
       maxFilter->SetInput1(duplicator->GetOutput());
       maxFilter->SetInput2(readImage);
       maxFilter->Update();
@@ -173,7 +173,7 @@ int main( int argc, char * argv[] )
   }
 
   typedef itk::ShiftScaleImageFilter<ScalarImageType, ScalarImageType> DivideFilterType;
-	DivideFilterType::Pointer divider = DivideFilterType::New();
+  DivideFilterType::Pointer divider = DivideFilterType::New();
   divider->SetInput(meanAccumulatorImage);
   double scaleFactor=1.0/numberOfImages;
   divider->SetScale(scaleFactor);
@@ -218,5 +218,5 @@ int main( int argc, char * argv[] )
     }
   }
 
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

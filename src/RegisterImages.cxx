@@ -35,22 +35,22 @@ typedef itk::VersorRigid3DTransformOptimizer OptimizerType;
 class CommandIterationUpdate : public itk::Command 
 {
 public:
-	typedef  CommandIterationUpdate   Self;
-	typedef  itk::Command             Superclass;
-	typedef  itk::SmartPointer<CommandIterationUpdate>  Pointer;
-	itkNewMacro( CommandIterationUpdate );
+  typedef  CommandIterationUpdate   Self;
+  typedef  itk::Command             Superclass;
+  typedef  itk::SmartPointer<CommandIterationUpdate>  Pointer;
+  itkNewMacro( CommandIterationUpdate );
 protected:
-	CommandIterationUpdate() {};
+  CommandIterationUpdate() {};
 
 public:
 
-	void Execute(itk::Object *caller, const itk::EventObject & event)
-	{
-		Execute( (const itk::Object *)caller, event);
-	}
+  void Execute(itk::Object *caller, const itk::EventObject & event)
+  {
+    Execute( (const itk::Object *)caller, event);
+  }
 
-	void Execute(const itk::Object * object, const itk::EventObject & event)
-	{
+  void Execute(const itk::Object * object, const itk::EventObject & event)
+  {
     const DeformableRegistrationFilterType * deformableReg = dynamic_cast< const DeformableRegistrationFilterType * >( object );
     const OptimizerType * optimizer = dynamic_cast< const OptimizerType * >( object );
 
@@ -69,7 +69,7 @@ public:
       std::cout << optimizer->GetValue() << "   ";
       std::cout << optimizer->GetCurrentPosition() << std::endl;
     } 
-	}
+  }
 
 };
 
@@ -236,37 +236,37 @@ void RigidRegistration(DeformationFieldType::Pointer& deformationField, External
 
 void DeformableRegistration(DeformationFieldType::Pointer& deformationField, ExternalImageType::ConstPointer fixedImage, ExternalImageType::ConstPointer movingImage, int maxNumberOfIterations=30, double gradientSmoothingStandardDeviations=0)
 {
-	typedef itk::CastImageFilter<ExternalImageType, InternalImageType > FixedImageCasterType;
-	typedef itk::CastImageFilter<ExternalImageType, InternalImageType > MovingImageCasterType;
+  typedef itk::CastImageFilter<ExternalImageType, InternalImageType > FixedImageCasterType;
+  typedef itk::CastImageFilter<ExternalImageType, InternalImageType > MovingImageCasterType;
 
-	FixedImageCasterType::Pointer fixedImageCaster   = FixedImageCasterType::New();
-	MovingImageCasterType::Pointer movingImageCaster = MovingImageCasterType::New();
+  FixedImageCasterType::Pointer fixedImageCaster   = FixedImageCasterType::New();
+  MovingImageCasterType::Pointer movingImageCaster = MovingImageCasterType::New();
 
-	fixedImageCaster->SetInput(fixedImage);
-	movingImageCaster->SetInput(movingImage); 
+  fixedImageCaster->SetInput(fixedImage);
+  movingImageCaster->SetInput(movingImage); 
 
-	DeformableRegistrationFilterType::Pointer registrationFilter = DeformableRegistrationFilterType::New();
+  DeformableRegistrationFilterType::Pointer registrationFilter = DeformableRegistrationFilterType::New();
 
-	// Create the Command observer and register it with the registration filter.
-	CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
-	registrationFilter->AddObserver( itk::IterationEvent(), observer );
+  // Create the Command observer and register it with the registration filter.
+  CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
+  registrationFilter->AddObserver( itk::IterationEvent(), observer );
 
-	registrationFilter->SetFixedImage(fixedImageCaster->GetOutput());
-	registrationFilter->SetMovingImage(movingImageCaster->GetOutput());
+  registrationFilter->SetFixedImage(fixedImageCaster->GetOutput());
+  registrationFilter->SetMovingImage(movingImageCaster->GetOutput());
 
-	registrationFilter->SetNumberOfIterations(maxNumberOfIterations);
-	registrationFilter->SetGradientSmoothingStandardDeviations(gradientSmoothingStandardDeviations);
+  registrationFilter->SetNumberOfIterations(maxNumberOfIterations);
+  registrationFilter->SetGradientSmoothingStandardDeviations(gradientSmoothingStandardDeviations);
 
   if (gradientSmoothingStandardDeviations>0)
   {
-	  // To smooth the deformation field (otherwise deformation field is nonzero near the object edge only)
-	  registrationFilter->SmoothDeformationFieldOn();
-	  registrationFilter->SetStandardDeviations(2.0);
+    // To smooth the deformation field (otherwise deformation field is nonzero near the object edge only)
+    registrationFilter->SmoothDeformationFieldOn();
+    registrationFilter->SetStandardDeviations(2.0);
   }
 
-	registrationFilter->Update();
+  registrationFilter->Update();
 
-	deformationField=registrationFilter->GetDeformationField();
+  deformationField=registrationFilter->GetDeformationField();
 
 }
 
@@ -274,67 +274,67 @@ void DeformableRegistration(DeformationFieldType::Pointer& deformationField, Ext
 
 int main( int argc, char * argv[] )
 {
-	std::string fixedImageFilename = "PreOpSegmentedImage.mha";
-	std::string movingImageFilename = "IntraOpSegmentedImage.mha";
-	std::string registrationMethod = "RIGID";
-	std::string outputRegisteredImageFilename;
-	std::string outputDeformationFieldFilename;
-	std::string fixedPointsFilename;
-	std::string movingPointsFilename;
+  std::string fixedImageFilename = "PreOpSegmentedImage.mha";
+  std::string movingImageFilename = "IntraOpSegmentedImage.mha";
+  std::string registrationMethod = "RIGID";
+  std::string outputRegisteredImageFilename;
+  std::string outputDeformationFieldFilename;
+  std::string fixedPointsFilename;
+  std::string movingPointsFilename;
 
-	int numberOfIterations=5;
-	double gradientSmoothingStandardDeviations=4.0;
+  int numberOfIterations=5;
+  double gradientSmoothingStandardDeviations=4.0;
 
-	vtksys::CommandLineArguments args;
-	args.Initialize(argc, argv);
+  vtksys::CommandLineArguments args;
+  args.Initialize(argc, argv);
 
-	args.AddArgument("--fixedImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &fixedImageFilename, "Fixed image file name");
-	args.AddArgument("--movingImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &movingImageFilename, "Moving image file name");
-	args.AddArgument("--registrationMethod", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &registrationMethod, "Registration method: DEFORMABLE or RIGID"); 
-	args.AddArgument("--outputRegisteredImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputRegisteredImageFilename, "Resulting deformed moving image (optional)");
-	args.AddArgument("--outputDeformationField", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputDeformationFieldFilename, "Resulting deformation image file name (optional)");
-	args.AddArgument("--inputFixedImagePoints", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &fixedPointsFilename, "Position of points in the fixed image"); 
-	args.AddArgument("--outputMovingImagePoints", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &movingPointsFilename, "Resulting point positions in the moving image"); 
-	args.AddArgument("--numberOfIterations", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &numberOfIterations, "Number of registration iterations"); 
-	args.AddArgument("--gradientSmoothingStandardDeviations", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &gradientSmoothingStandardDeviations, "For LEVELSET: gradient smoothing (in standard deviations)"); 
+  args.AddArgument("--fixedImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &fixedImageFilename, "Fixed image file name");
+  args.AddArgument("--movingImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &movingImageFilename, "Moving image file name");
+  args.AddArgument("--registrationMethod", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &registrationMethod, "Registration method: DEFORMABLE or RIGID"); 
+  args.AddArgument("--outputRegisteredImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputRegisteredImageFilename, "Resulting deformed moving image (optional)");
+  args.AddArgument("--outputDeformationField", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &outputDeformationFieldFilename, "Resulting deformation image file name (optional)");
+  args.AddArgument("--inputFixedImagePoints", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &fixedPointsFilename, "Position of points in the fixed image"); 
+  args.AddArgument("--outputMovingImagePoints", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &movingPointsFilename, "Resulting point positions in the moving image"); 
+  args.AddArgument("--numberOfIterations", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &numberOfIterations, "Number of registration iterations"); 
+  args.AddArgument("--gradientSmoothingStandardDeviations", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &gradientSmoothingStandardDeviations, "For LEVELSET: gradient smoothing (in standard deviations)"); 
 
-	if ( !args.Parse() )
-	{
-		std::cerr << "Problem parsing arguments" << std::endl;
-		std::cout << "Help: " << args.GetHelp() << std::endl;
-		exit(EXIT_FAILURE);
-	}
+  if ( !args.Parse() )
+  {
+    std::cerr << "Problem parsing arguments" << std::endl;
+    std::cout << "Help: " << args.GetHelp() << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
 
-	// Read images
+  // Read images
 
-	ExternalImageReaderType::Pointer fixedReader = ExternalImageReaderType::New();
-	fixedReader->SetFileName( fixedImageFilename );
-	try
-	{
-		fixedReader->Update();
-	}
-	catch( itk::ExceptionObject & excp )
-	{
-		std::cerr << "Exception thrown " << std::endl;
-		std::cerr << excp << std::endl;
-		return EXIT_FAILURE;
-	}
-	ExternalImageType::ConstPointer fixedImage = fixedReader->GetOutput();
+  ExternalImageReaderType::Pointer fixedReader = ExternalImageReaderType::New();
+  fixedReader->SetFileName( fixedImageFilename );
+  try
+  {
+    fixedReader->Update();
+  }
+  catch( itk::ExceptionObject & excp )
+  {
+    std::cerr << "Exception thrown " << std::endl;
+    std::cerr << excp << std::endl;
+    return EXIT_FAILURE;
+  }
+  ExternalImageType::ConstPointer fixedImage = fixedReader->GetOutput();
 
-	ExternalImageReaderType::Pointer movingReader = ExternalImageReaderType::New();
-	movingReader->SetFileName( movingImageFilename );
-	try
-	{
-		movingReader->Update();
-	}
-	catch( itk::ExceptionObject & excp )
-	{
-		std::cerr << "Exception thrown " << std::endl;
-		std::cerr << excp << std::endl;
-		return EXIT_FAILURE;
-	}
-	ExternalImageType::ConstPointer movingImage = movingReader->GetOutput();
+  ExternalImageReaderType::Pointer movingReader = ExternalImageReaderType::New();
+  movingReader->SetFileName( movingImageFilename );
+  try
+  {
+    movingReader->Update();
+  }
+  catch( itk::ExceptionObject & excp )
+  {
+    std::cerr << "Exception thrown " << std::endl;
+    std::cerr << excp << std::endl;
+    return EXIT_FAILURE;
+  }
+  ExternalImageType::ConstPointer movingImage = movingReader->GetOutput();
 
   bool needDeformationField=false;
   if (!outputDeformationFieldFilename.empty())
@@ -355,66 +355,66 @@ int main( int argc, char * argv[] )
 
   if (deformationField.IsNotNull() && !outputDeformationFieldFilename.empty())
   {
-		typedef itk::ImageFileWriter< DeformationFieldType >  FieldWriterType;
-		FieldWriterType::Pointer fieldWriter = FieldWriterType::New();
-		fieldWriter->SetInput( deformationField );
-		fieldWriter->SetFileName( outputDeformationFieldFilename );
-		try
-		{
-			fieldWriter->Update();
-		}
-		catch( itk::ExceptionObject & excp )
-		{
-			std::cerr << "Exception thrown " << std::endl;
-			std::cerr << excp << std::endl;
-			return EXIT_FAILURE;
-		}
-	}
+    typedef itk::ImageFileWriter< DeformationFieldType >  FieldWriterType;
+    FieldWriterType::Pointer fieldWriter = FieldWriterType::New();
+    fieldWriter->SetInput( deformationField );
+    fieldWriter->SetFileName( outputDeformationFieldFilename );
+    try
+    {
+      fieldWriter->Update();
+    }
+    catch( itk::ExceptionObject & excp )
+    {
+      std::cerr << "Exception thrown " << std::endl;
+      std::cerr << excp << std::endl;
+      return EXIT_FAILURE;
+    }
+  }
 
   if (deformationField.IsNotNull() && !outputRegisteredImageFilename.empty())
-	{
-		//create the filter that applies the deformation
-		typedef itk::WarpImageFilter<ExternalImageType, ExternalImageType, DeformationFieldType>  WarpImageFilterType;
-		WarpImageFilterType::Pointer warpFilter = WarpImageFilterType::New();
+  {
+    //create the filter that applies the deformation
+    typedef itk::WarpImageFilter<ExternalImageType, ExternalImageType, DeformationFieldType>  WarpImageFilterType;
+    WarpImageFilterType::Pointer warpFilter = WarpImageFilterType::New();
 
-		//use linear interpolation method for float-valued outputs of the deformation
-		typedef itk::LinearInterpolateImageFunction<ExternalImageType, double>  InterpolatorType;
-		InterpolatorType::Pointer interpolator = InterpolatorType::New();
+    //use linear interpolation method for float-valued outputs of the deformation
+    typedef itk::LinearInterpolateImageFunction<ExternalImageType, double>  InterpolatorType;
+    InterpolatorType::Pointer interpolator = InterpolatorType::New();
 
-		warpFilter->SetInterpolator(interpolator);
-		warpFilter->SetOutputSpacing(deformationField->GetSpacing());
-		warpFilter->SetOutputOrigin(deformationField->GetOrigin());
-		warpFilter->SetDeformationField(deformationField);
+    warpFilter->SetInterpolator(interpolator);
+    warpFilter->SetOutputSpacing(deformationField->GetSpacing());
+    warpFilter->SetOutputOrigin(deformationField->GetOrigin());
+    warpFilter->SetDeformationField(deformationField);
 
-		warpFilter->SetInput(movingImage);
+    warpFilter->SetInput(movingImage);
 
-		try
-		{
-			warpFilter->Update();
-		}
-		catch( itk::ExceptionObject & err ) 
-		{ 
-			std::cerr << "ExceptionObject caught !" << std::endl; 
-			std::cerr << err << std::endl; 
-			exit(-1);
-		}
+    try
+    {
+      warpFilter->Update();
+    }
+    catch( itk::ExceptionObject & err ) 
+    { 
+      std::cerr << "ExceptionObject caught !" << std::endl; 
+      std::cerr << err << std::endl; 
+      exit(-1);
+    }
 
-		typedef   itk::ImageFileWriter< ExternalImageType >  MovingWriterType;
-		MovingWriterType::Pointer movingWriter = MovingWriterType::New();
-		movingWriter->SetFileName( outputRegisteredImageFilename );
-		movingWriter->SetInput(warpFilter->GetOutput());
+    typedef   itk::ImageFileWriter< ExternalImageType >  MovingWriterType;
+    MovingWriterType::Pointer movingWriter = MovingWriterType::New();
+    movingWriter->SetFileName( outputRegisteredImageFilename );
+    movingWriter->SetInput(warpFilter->GetOutput());
 
-		try
-		{
-			movingWriter->Update();
-		}
-		catch( itk::ExceptionObject & excp )
-		{
-			std::cerr << "Exception thrown " << std::endl;
-			std::cerr << excp << std::endl;
-			return EXIT_FAILURE;
-		}
-	}
+    try
+    {
+      movingWriter->Update();
+    }
+    catch( itk::ExceptionObject & excp )
+    {
+      std::cerr << "Exception thrown " << std::endl;
+      std::cerr << excp << std::endl;
+      return EXIT_FAILURE;
+    }
+  }
 
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

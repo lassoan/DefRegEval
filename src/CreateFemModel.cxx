@@ -80,22 +80,22 @@ void AddSurfaceTrianglePointIdsInSphere(vtkIdList *trianglePointIds, vtkUnstruct
   vtkDoubleArray* pointCoords=vtkDoubleArray::SafeDownCast(ugrid->GetPoints()->GetData());
   vtkCharArray* onSurfaceArray=vtkCharArray::SafeDownCast(ugrid->GetPointData()->GetArray(DefRegEvalGlobal::ArrayNameOnSurface));
 
-	// Extract all the triangles from the polyhedra elements
-	//ugrid->Update();
-	vtkPoints *points = ugrid->GetPoints();
-	vtkCellArray *cells = ugrid->GetCells();
-	cells->InitTraversal();	
-	vtkIdType npts, *pts;
+  // Extract all the triangles from the polyhedra elements
+  //ugrid->Update();
+  vtkPoints *points = ugrid->GetPoints();
+  vtkCellArray *cells = ugrid->GetCells();
+  cells->InitTraversal();  
+  vtkIdType npts, *pts;
   double coord[3]={0,0,0};
   bool surfPoint[4]={false,false,false};
-	while (cells->GetNextCell(npts, pts))
-	{
-		if (npts != 4)
-		{
-			// only extract tetrahedra
-			continue;
-		}
-		// Ordering: counter-clockwise (http://www.vtk.org/VTK/img/file-formats.pdf)
+  while (cells->GetNextCell(npts, pts))
+  {
+    if (npts != 4)
+    {
+      // only extract tetrahedra
+      continue;
+    }
+    // Ordering: counter-clockwise (http://www.vtk.org/VTK/img/file-formats.pdf)
     
     for (int i=0; i<4; i++)
     {
@@ -142,7 +142,7 @@ void AddSurfaceTrianglePointIdsInSphere(vtkIdList *trianglePointIds, vtkUnstruct
       }
     }
 
-	}
+  }
 
 }
 
@@ -208,7 +208,9 @@ static const char* ARRAY_NAME_MATERIAL="material";
 
 int main(int argc, char *argv[])
 {
+#if defined(_WIN32)
   VTK_LOG_TO_CONSOLE;
+#endif 
 
   std::string inputObjectFilename = "object-volumemesh.vol";
   std::string inputSupportFilename = "support-volumemesh.vol";
@@ -278,7 +280,7 @@ int main(int argc, char *argv[])
 /*
 vtkSmartPointer<vtkXMLUnstructuredGridWriter> xmlGridWriter=vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 xmlGridWriter->SetInput(organMeshReader->GetOutput());  
-xmlGridWriter->SetFileName(outputFilename.c_str());		
+xmlGridWriter->SetFileName(outputFilename.c_str());    
 xmlGridWriter->Update(); 
 */
 

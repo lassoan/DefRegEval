@@ -1,181 +1,31 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 PROJECT (febio)
 
-OPTION(FEBIO_USE_PRECOMPILED_RELEASE "Use precompiled release instead of compiling it from source. The precompiled release uses PARDISO, a more efficient solver." ON)
+# There is nothing to build, just copy a precompiled release.
+# The febio solver is open source and can quite simply built using CMake.
+# However, to build a release that runs efficiently the Pardiso solver
+# has to be obtained and build, too. So, it is easier to just download the
+# release from http://mrl.sci.utah.edu/software/febio
 
-# conditionally compile legacy classes
-IF (FEBIO_USE_PRECOMPILED_RELEASE)
+IF(WIN32)
+  FILE(COPY ${febio_SOURCE_DIR}/Release-Win32/FEBio
+    DESTINATION ${EXECUTABLE_OUTPUT_PATH}/Release/
+    FILE_PERMISSIONS WORLD_EXECUTE WORLD_READ
+     GROUP_EXECUTE GROUP_READ OWNER_EXECUTE OWNER_READ)
+  FILE(COPY ${febio_SOURCE_DIR}/Release-Win32/febio.xml
+    DESTINATION ${EXECUTABLE_OUTPUT_PATH}/Release/
+    FILE_PERMISSIONS WORLD_READ GROUP_READ OWNER_READ)
+ENDIF(WIN32)
 
-  CONFIGURE_FILE(${febio_SOURCE_DIR}/Release/FEBio.exe
-    ${EXECUTABLE_OUTPUT_PATH}/Release/FEBio.exe COPYONLY)    
-  CONFIGURE_FILE(${febio_SOURCE_DIR}/Release/febio.xml
-    ${EXECUTABLE_OUTPUT_PATH}/Release/febio.xml COPYONLY)
-               
-ELSE (FEBIO_USE_PRECOMPILED_RELEASE)
+IF(UNIX)
+  FILE(COPY ${febio_SOURCE_DIR}/Release-Linux32/FEBio
+    DESTINATION ${EXECUTABLE_OUTPUT_PATH}/
+    FILE_PERMISSIONS WORLD_EXECUTE WORLD_READ
+     GROUP_EXECUTE GROUP_READ OWNER_EXECUTE OWNER_READ)
+  FILE(COPY ${febio_SOURCE_DIR}/Release-Linux32/febio.xml
+    DESTINATION ${EXECUTABLE_OUTPUT_PATH}/
+    FILE_PERMISSIONS WORLD_READ GROUP_READ OWNER_READ)
+ENDIF(UNIX)
 
-  OPTION(FEBIO_USE_PARDISO_SOLVER "Support PARDISO solver. PARDISO is more efficient than the built-in Slyline solver, but it requires the PARDISO library (available from http://www.pardiso-project.org)." ON)
-
-  IF (FEBIO_USE_PARDISO_SOLVER)
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DPARDISO")
-  ENDIF (FEBIO_USE_PARDISO_SOLVER)    
-
-  # Set Windows-specific command line switches
-  IF(WIN32 AND NOT CYGWIN)
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_CONSOLE /D_CRT_SECURE_NO_WARNINGS")
-  ENDIF(WIN32 AND NOT CYGWIN)
-  
-  INCLUDE_DIRECTORIES ( ${febio_SOURCE_DIR} )
-  
-  ADD_LIBRARY (FECore
-    FECore/stdafx.cpp
-  	FECore/ConjGradIterSolver.cpp 
-    FECore/FECore.cpp 
-    FECore/LinearSolver.cpp 
-    FECore/MatrixFactory.cpp 
-    FECore/MatrixProfile.cpp 
-    FECore/PSLDLTSolver.cpp 
-    FECore/PardisoSolver.cpp 
-    FECore/SkylineSolver.cpp 
-    FECore/SparseMatrix.cpp 
-    FECore/SuperLUSolver.cpp 
-    FECore/SuperLU_MT_Solver.cpp 
-    FECore/WSMPSolver.cpp 
-    FECore/colsol.cpp 
-    FECore/lusolver.cpp 
-    FECore/matrix.cpp  
-    FECore/vector.cpp 
-  )
-  
-  ADD_EXECUTABLE (FEBio
-    FEBio/Archive.cpp
-    FEBio/augment.cpp
-    FEBio/BFGSSolver.cpp
-    FEBio/colsol.cpp
-    FEBio/CommandManager.cpp
-    FEBio/console.cpp
-    FEBio/DataStore.cpp
-    FEBio/diagnose.cpp
-    FEBio/elstf.cpp
-    FEBio/FE2DFiberNeoHookean.cpp
-    FEBio/FE2DTransIsoMooneyRivlin.cpp
-    FEBio/FE2DTransIsoVerondaWestmann.cpp
-    FEBio/FEAnalysis.cpp
-    FEBio/FEArrudaBoyce.cpp
-    FEBio/FEAugLagLinearConstraint.cpp
-    FEBio/FEBio.cpp
-    FEBio/FEBioCommand.cpp
-    FEBio/FEBioImport.cpp
-    FEBio/FEBioPlotFile.cpp
-    FEBio/FEBoundaryCondition.cpp
-    FEBio/FEBox.cpp
-    FEBio/FEContactDiagnostic.cpp
-    FEBio/FEContactInterface.cpp
-    FEBio/FEContactSurface.cpp
-    FEBio/FECoordSysMap.cpp
-    FEBio/FEDiagnostic.cpp
-    FEBio/FEElemElemList.cpp
-    FEBio/FEElement.cpp
-    FEBio/FEElementLibrary.cpp
-    FEBio/FEElementTraits.cpp
-    FEBio/FEException.cpp
-    FEBio/FEFacet2FacetSliding.cpp
-    FEBio/FEFiberMaterial.cpp
-    FEBio/FEFiberNeoHookean.cpp
-    FEBio/FEFungOrthotropic.cpp
-    FEBio/FEHeatSolver.cpp
-    FEBio/FEHolmesMow.cpp
-    FEBio/FEIncompNeoHookean.cpp
-    FEBio/FEIsotropicElastic.cpp
-    FEBio/FEIsotropicFourier.cpp
-    FEBio/FELevelStructure.cpp
-    FEBio/FELinearElastic.cpp
-    FEBio/FELinearOrthotropic.cpp
-    FEBio/fem.cpp
-    FEBio/FEMaterial.cpp
-    FEBio/FEMaterialFactory.cpp
-    FEBio/FEMaterialPoint.cpp
-    FEBio/FEMemoryDiagnostic.cpp
-    FEBio/FEMesh.cpp
-    FEBio/FEMicroMaterial.cpp
-    FEBio/FEMooneyRivlin.cpp
-    FEBio/FEMuscleMaterial.cpp
-    FEBio/FENeoHookean.cpp
-    FEBio/FENeoHookeanTransIso.cpp
-    FEBio/FENNQuery.cpp
-    FEBio/FENodeElemList.cpp
-    FEBio/FENodeNodeList.cpp
-    FEBio/FENodeReorder.cpp
-    FEBio/FEOgdenMaterial.cpp
-    FEBio/FEParameterList.cpp
-    FEBio/FEPeriodicBoundary.cpp
-    FEBio/FEPlotData.cpp
-    FEBio/FEPoroConstPerm.cpp
-    FEBio/FEPoroElastic.cpp
-    FEBio/FEPoroHolmesMow.cpp
-    FEBio/FEPrintHBMatrixDiagnostic.cpp
-    FEBio/FEPrintMatrixDiagnostic.cpp
-    FEBio/FERandomFiberDonnanEquilibrium.cpp
-    FEBio/FERandomFiberMaterial.cpp
-    FEBio/FERandomFiberNeoHookean.cpp
-    FEBio/FERandomFiberVerondaWestmann.cpp
-    FEBio/FERestartImport.cpp
-    FEBio/FERigid.cpp
-    FEBio/FERigidBody.cpp
-    FEBio/FERigidJoint.cpp
-    FEBio/FERigidSurface.cpp
-    FEBio/FERigidWallInterface.cpp
-    FEBio/FESlidingInterface.cpp
-    FEBio/FESlidingInterface2.cpp
-    FEBio/FESolidSolver.cpp
-    FEBio/FESolver.cpp
-    FEBio/FEStiffnessMatrix.cpp
-    FEBio/FEStVenantKirchhoff.cpp
-    FEBio/FESurface.cpp
-    FEBio/FESurfaceConstraint.cpp
-    FEBio/FETangentDiagnostic.cpp
-    FEBio/FETCNonlinearOrthotropic.cpp
-    FEBio/FETendonMaterial.cpp
-    FEBio/FETiedContactSurface.cpp
-    FEBio/FETiedInterface.cpp
-    FEBio/FETransIsoMooneyRivlin.cpp
-    FEBio/FETransIsoVerondaWestmann.cpp
-    FEBio/FETrussMaterial.cpp
-    FEBio/FEVerondaWestmann.cpp
-    FEBio/FEViscoElasticMaterial.cpp
-    FEBio/FileImport.cpp
-    FEBio/getapppath.cpp
-    FEBio/hello.cpp
-    FEBio/init.cpp
-    FEBio/InitContact.cpp
-    FEBio/InitHeat.cpp
-    FEBio/InitPoro.cpp
-    FEBio/InitRigid.cpp
-    FEBio/InitSolver.cpp
-    FEBio/input.cpp
-    FEBio/Interrupt.cpp
-    FEBio/LoadCurve.cpp
-    FEBio/Logfile.cpp
-    FEBio/LSDYNAPlotFile.cpp
-    FEBio/mat3d.cpp
-    FEBio/MathParser.cpp
-    FEBio/MyMap.cpp
-    FEBio/NikeImport.cpp
-    FEBio/optimize.cpp
-    FEBio/PlotFile.cpp
-    FEBio/quasin.cpp
-    FEBio/queue.cpp
-    FEBio/restart.cpp
-    FEBio/shell.cpp
-    FEBio/solve.cpp
-    FEBio/stdafx.cpp
-    FEBio/string.cpp
-    FEBio/tens4d.cpp
-    FEBio/Timer.cpp
-    FEBio/truss.cpp
-    FEBio/update.cpp
-    FEBio/XMLReader.cpp
-  )
-  
-  TARGET_LINK_LIBRARIES (FEBio FECore) 
-
-ENDIF (FEBIO_USE_PRECOMPILED_RELEASE)
+IF(APPLE)
+  MESSAGE(WARNING "FEBio is not available for your platform. Download it from http://mrl.sci.utah.edu/software/febio and copy the executable and configuration file to ${EXECUTABLE_OUTPUT_PATH}/Release.")
+ENDIF(APPLE)

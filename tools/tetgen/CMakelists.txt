@@ -7,6 +7,6 @@ IF(WIN32 AND NOT CYGWIN)
 ENDIF(WIN32 AND NOT CYGWIN)
 
 add_executable (tetgen
-	tetgen.cxx
-	predicates.cxx
+  tetgen.cxx
+  predicates.cxx
 )

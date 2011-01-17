@@ -164,7 +164,7 @@ int main( int argc, char * argv[] )
 
     // Create a matrix that transforms the image to the world origin and align
     // the axes with world xyz (LPS)
-    MatrixType imageToLps;		
+    MatrixType imageToLps;    
     imageToLps.SetIdentity();
     for (int row=0; row<SpaceDimension; row++)
     {
@@ -172,7 +172,7 @@ int main( int argc, char * argv[] )
       {
         imageToLps(row,col)=fixedDirection[row][col];
       }
-      imageToLps(row,SpaceDimension)=fixedOrigin[row];			
+      imageToLps(row,SpaceDimension)=fixedOrigin[row];      
     }
     MatrixType lpsToImage;
     lpsToImage=imageToLps.GetInverse();
@@ -182,7 +182,7 @@ int main( int argc, char * argv[] )
     for (int row=0; row<SpaceDimension; row++)
     {
       deformationPosition_LPS[row]=deformationPosition[row];
-    }		
+    }    
     PointType deformationPosition_Image;
     deformationPosition_Image=lpsToImage*deformationPosition_LPS;
 
@@ -199,7 +199,7 @@ int main( int argc, char * argv[] )
       gridSpacing[row]=deformationRegionSize[row];
       numberOfGridNodesToTheLeft=floor(fabs(deformationPosition_Image[row]-imageLeft)/gridSpacing[row]) + numberOfGridNodesOutsideTheImageSupportLeft;
       numberOfGridNodesToTheRight=floor(fabs(deformationPosition_Image[row]-imageRight)/gridSpacing[row]) + numberOfGridNodesOutsideTheImageSupportRight;
-      gridOrigin_Image[row]=deformationPosition_Image[row]-numberOfGridNodesToTheLeft*gridSpacing[row];			
+      gridOrigin_Image[row]=deformationPosition_Image[row]-numberOfGridNodesToTheLeft*gridSpacing[row];      
       gridSize[row]=numberOfGridNodesToTheLeft+1+numberOfGridNodesToTheRight;
       deformationPositionNodeIndices[row]=numberOfGridNodesToTheLeft;
     }
@@ -209,7 +209,7 @@ int main( int argc, char * argv[] )
     for (int row=0; row<SpaceDimension; row++)
     {
       gridOrigin[row]=gridOrigin_LPS[row];
-    }	
+    }  
 
   }
 
