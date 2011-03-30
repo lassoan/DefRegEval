@@ -60,6 +60,18 @@ public:
   vtkSetMacro(SupportMaterialId, int);
   vtkGetMacro(SupportMaterialId, int);
 
+  vtkSetMacro(OrganMaterialE, double);
+  vtkGetMacro(OrganMaterialE, double);
+
+  vtkSetMacro(OrganMaterialv, double);
+  vtkGetMacro(OrganMaterialv, double);
+
+  vtkSetMacro(SupportMaterialE, double);
+  vtkGetMacro(SupportMaterialE, double);
+
+  vtkSetMacro(SupportMaterialv, double);
+  vtkGetMacro(SupportMaterialv, double);
+
 protected:
   vtkFEBioWriter();
   virtual ~vtkFEBioWriter();
@@ -129,6 +141,12 @@ protected:
 
   int OrganMaterialId;
   int SupportMaterialId;
+
+  // material properties, assuming linear elastic material model
+  double OrganMaterialE;
+  double OrganMaterialv;
+  double SupportMaterialE;
+  double SupportMaterialv;    
 
 private:
   vtkFEBioWriter(const vtkFEBioWriter&);  // Not implemented.
