@@ -53,63 +53,44 @@ void WriteHistogram(const char *outputFilename, ScalarImageType::Pointer inputIm
   // It would be simpler to use ScalarImageToHistogramGenerator, but unfortunately it auto-scales the histogram bins
 
   typedef itk::Statistics::ImageToListSampleAdaptor<ScalarImageType>   AdaptorType;
-  typedef AdaptorType::Pointer                   AdaptorPointer;
   typedef ScalarImageType::PixelType                   PixelType;
   typedef itk::NumericTraits< PixelType >::RealType   RealPixelType;
-
   typedef itk::Statistics::Histogram< double > HistogramType;
   typedef itk::Statistics::SampleToHistogramFilter< AdaptorType, HistogramType > GeneratorType;
 
-  typedef GeneratorType::Pointer                   GeneratorPointer;
+  AdaptorType::Pointer imageToListAdaptor = AdaptorType::New();
+  imageToListAdaptor->SetImage( inputImage );
 
-  typedef HistogramType::Pointer                   HistogramPointer;
-  typedef HistogramType::ConstPointer              HistogramConstPointer;
-
-  AdaptorPointer      m_ImageToListAdaptor;
-  GeneratorPointer    m_HistogramGenerator;
-  
-
-
-  m_ImageToListAdaptor = AdaptorType::New();
-  m_HistogramGenerator = GeneratorType::New();
-  m_HistogramGenerator->SetInput( m_ImageToListAdaptor );
-
-  m_HistogramGenerator->SetAutoMinimumMaximum(false);
-
-  HistogramType::Pointer histogramGenerator = HistogramType::New();
+  GeneratorType::Pointer histogramGenerator = GeneratorType::New();  
+  histogramGenerator->SetInput( imageToListAdaptor );
+  histogramGenerator->SetAutoMinimumMaximum(false);
 
   double histogramBinWidth=(histogramMax-histogramMin)/(histogramBinCount-1);
   
   HistogramType::SizeType size;
   size.SetSize(1);
   size.Fill( histogramBinCount );
-  m_HistogramGenerator->SetHistogramSize( size );
+  histogramGenerator->SetHistogramSize( size );
   
-  //m_HistogramGenerator->SetMarginalScale( 10.0 );
-
   typedef GeneratorType::HistogramMeasurementVectorType     MeasurementVectorType;
   MeasurementVectorType minVector;
   itk::Statistics::MeasurementVectorTraits::SetLength(minVector,1);
   minVector[0] = histogramMin-histogramBinWidth/2.0;
-  m_HistogramGenerator->SetHistogramBinMinimum( minVector );
+  histogramGenerator->SetHistogramBinMinimum( minVector );
 
   typedef GeneratorType::HistogramMeasurementVectorType     MeasurementVectorType;
   MeasurementVectorType maxVector;
   itk::Statistics::MeasurementVectorTraits::SetLength(maxVector,1);
   maxVector[0] = histogramMax+histogramBinWidth/2.0;
-  m_HistogramGenerator->SetHistogramBinMaximum( maxVector );
+  histogramGenerator->SetHistogramBinMaximum( maxVector );
 
-  m_ImageToListAdaptor->SetImage( inputImage );
-
-  m_HistogramGenerator->Update();
-  const HistogramType * histogram = m_HistogramGenerator->GetOutput();
-
-  const unsigned int histogramSize = histogram->Size();
+  histogramGenerator->Update();  
 
   std::ofstream outputFile(outputFilename);
 
-  outputFile << "bin center, frequency, histogramSize: " << histogramSize << std::endl;
+  outputFile << "bin center, frequency" << std::endl;
 
+  const HistogramType * histogram = histogramGenerator->GetOutput();
   HistogramType::ConstIterator itr = histogram->Begin();
   HistogramType::ConstIterator end = histogram->End();
 
