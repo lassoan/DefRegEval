@@ -224,6 +224,9 @@ int main(int argc, char *argv[])
 
   vtkstd::vector<double> probeForce; // {-5..+5, -18, 8}
 
+  vtkstd::vector<double> organMaterialProperties; // E and v
+  vtkstd::vector<double> supportMaterialProperties; // E and v
+
   int solverTimeSteps=10;
 
   vtksys::CommandLineArguments args;
@@ -239,6 +242,9 @@ int main(int argc, char *argv[])
   args.AddArgument("--ProbePosition2", vtksys::CommandLineArguments::MULTI_ARGUMENT, &probePosition2, "Position of the probe contact center 2"); 
   args.AddArgument("--ProbeRadius", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &probeRadius, "Radius of the probe contact"); 
   args.AddArgument("--ProbeForce", vtksys::CommandLineArguments::MULTI_ARGUMENT, &probeForce, "Probe force vector"); 
+
+  args.AddArgument("--OrganMaterialProperties", vtksys::CommandLineArguments::MULTI_ARGUMENT, &organMaterialProperties, "Material properties of the organ (linear elastic model, two parameters: E, v). Optional."); 
+  args.AddArgument("--SupportMaterialProperties", vtksys::CommandLineArguments::MULTI_ARGUMENT, &supportMaterialProperties, "Material properties of the support (linear elastic model, two parameters: E, v). Optional."); 
 
   args.AddArgument("--SolverTimeSteps", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &solverTimeSteps, "Number of timesteps for the solver"); 
 
@@ -268,6 +274,17 @@ int main(int argc, char *argv[])
   if (probeForce.size()!=3)
   {
     std::cerr << "Invalid probeForce" << std::endl;
+    exit(EXIT_FAILURE);
+  } 
+
+  if (! (organMaterialProperties.size()==0 || organMaterialProperties.size()==2) )
+  {
+    std::cerr << "Organ material property shall be defined by 2 values" << std::endl;
+    exit(EXIT_FAILURE);
+  } 
+  if (! (supportMaterialProperties.size()==0 || supportMaterialProperties.size()==2) )
+  {
+    std::cerr << "Support material property shall be defined by 2 values" << std::endl;
     exit(EXIT_FAILURE);
   } 
 
@@ -317,6 +334,17 @@ xmlGridWriter->Update();
   {
     febioWriter->AddPointForceBoundaryCondition(probeContactPointIds, "z", probeForce[2]);
   }
+
+  if (organMaterialProperties.size()==2)
+  {
+    febioWriter->SetOrganMaterialE(organMaterialProperties[0]);
+    febioWriter->SetOrganMaterialv(organMaterialProperties[1]);    
+  } 
+  if (supportMaterialProperties.size()==2)
+  {
+    febioWriter->SetSupportMaterialE(supportMaterialProperties[0]);
+    febioWriter->SetSupportMaterialv(supportMaterialProperties[1]);    
+  } 
 
   febioWriter->SetNumberOfTimeSteps(solverTimeSteps);
 

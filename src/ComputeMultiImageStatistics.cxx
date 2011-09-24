@@ -14,6 +14,14 @@
 #include "itkMaximumImageFilter.h"
 #include "itkShiftScaleImageFilter.h"
 #include "itkAddImageFilter.h"
+//#include "itkScalarImageToHistogramGenerator.h"
+#include "itkImageToListSampleAdaptor.h"
+#include "itkSampleToHistogramFilter.h"
+#include "itkHistogram.h"
+
+typedef float  ScalarPixelType;
+typedef itk::Image< ScalarPixelType, ImageDimension > ScalarImageType;
+
 
 void readTextLineToListOfString(const char* textFileName, std::vector< std::string > &listOfStrings)
 {
@@ -40,20 +48,87 @@ void readTextLineToListOfString(const char* textFileName, std::vector< std::stri
 
 } 
 
+void WriteHistogram(const char *outputFilename, ScalarImageType::Pointer inputImage, int histogramBinCount, double histogramMin, double histogramMax)
+{  
+  // It would be simpler to use ScalarImageToHistogramGenerator, but unfortunately it auto-scales the histogram bins
+
+  typedef itk::Statistics::ImageToListSampleAdaptor<ScalarImageType>   AdaptorType;
+  typedef ScalarImageType::PixelType                   PixelType;
+  typedef itk::NumericTraits< PixelType >::RealType   RealPixelType;
+  typedef itk::Statistics::Histogram< double > HistogramType;
+  typedef itk::Statistics::SampleToHistogramFilter< AdaptorType, HistogramType > GeneratorType;
+
+  AdaptorType::Pointer imageToListAdaptor = AdaptorType::New();
+  imageToListAdaptor->SetImage( inputImage );
+
+  GeneratorType::Pointer histogramGenerator = GeneratorType::New();  
+  histogramGenerator->SetInput( imageToListAdaptor );
+  histogramGenerator->SetAutoMinimumMaximum(false);
+
+  double histogramBinWidth=(histogramMax-histogramMin)/(histogramBinCount-1);
+  
+  HistogramType::SizeType size;
+  size.SetSize(1);
+  size.Fill( histogramBinCount );
+  histogramGenerator->SetHistogramSize( size );
+  
+  typedef GeneratorType::HistogramMeasurementVectorType     MeasurementVectorType;
+  MeasurementVectorType minVector;
+  itk::Statistics::MeasurementVectorTraits::SetLength(minVector,1);
+  minVector[0] = histogramMin-histogramBinWidth/2.0;
+  histogramGenerator->SetHistogramBinMinimum( minVector );
+
+  typedef GeneratorType::HistogramMeasurementVectorType     MeasurementVectorType;
+  MeasurementVectorType maxVector;
+  itk::Statistics::MeasurementVectorTraits::SetLength(maxVector,1);
+  maxVector[0] = histogramMax+histogramBinWidth/2.0;
+  histogramGenerator->SetHistogramBinMaximum( maxVector );
+
+  histogramGenerator->Update();  
+
+  std::ofstream outputFile(outputFilename);
+
+  outputFile << "bin center, frequency" << std::endl;
+
+  const HistogramType * histogram = histogramGenerator->GetOutput();
+  HistogramType::ConstIterator itr = histogram->Begin();
+  HistogramType::ConstIterator end = histogram->End();
+
+  unsigned int binNumber = 0;
+  while( itr != end )
+  {
+    outputFile << binNumber*histogramBinWidth << ", " << itr.GetFrequency() << std::endl;
+    ++itr;
+    ++binNumber;
+  }
+
+  outputFile.close();
+}
+
 int main( int argc, char * argv[] )
 {
 
   std::string fileListFilename;
   std::string meanImageFilename;
   std::string maxImageFilename;
+  std::string meanHistogramFilename;
+  std::string maxHistogramFilename;
   bool vectorImageInput=false;
+  int histogramBinCount=51;
+  double histogramMin=0.0;
+  double histogramMax=5.0;
 
   vtksys::CommandLineArguments args;
   args.Initialize(argc, argv);
 
   args.AddArgument("--fileList", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &fileListFilename, "Text file with the list of files to be analysed");
-  args.AddArgument("--meanImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &meanImageFilename, "Mean image output");
-  args.AddArgument("--maxImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &maxImageFilename, "Max image output");
+  args.AddArgument("--meanImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &meanImageFilename, "Mean image output filename");
+  args.AddArgument("--maxImage", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &maxImageFilename, "Max image output filename");
+  args.AddArgument("--meanHistogram", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &meanHistogramFilename, "Histogram of mean image values output filename");
+  args.AddArgument("--maxHistogram", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &maxHistogramFilename, "Histogram of max image values output filename");
+  args.AddArgument("--histogramBinCount", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &histogramBinCount, "Number of histogram bins");
+  args.AddArgument("--histogramMin", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &histogramMin, "Histogram minimum value");
+  args.AddArgument("--histogramMax", vtksys::CommandLineArguments::EQUAL_ARGUMENT, &histogramMax, "Histogram maximum value");
   args.AddBooleanArgument("--vectorInput", &vectorImageInput, "Set it to true for processing vector images");
   
   if ( !args.Parse() )
@@ -66,10 +141,6 @@ int main( int argc, char * argv[] )
   std::vector< std::string > listOfStrings;
   readTextLineToListOfString(fileListFilename.c_str(), listOfStrings);
 
-  const unsigned int  ImageDimension = 3;
-
-  typedef float  ScalarPixelType;
-  typedef itk::Image< ScalarPixelType, ImageDimension > ScalarImageType;
   typedef itk::ImageFileReader< ScalarImageType > ScalarImageReaderType;
 
   typedef itk::Vector< ScalarPixelType, ImageDimension > VectorPixelType;
@@ -216,6 +287,16 @@ int main( int argc, char * argv[] )
       std::cerr << excp << std::endl;
       return EXIT_FAILURE;
     }
+  }
+
+  if (!meanHistogramFilename.empty())
+  {
+    WriteHistogram(meanHistogramFilename.c_str(), divider->GetOutput(), histogramBinCount, histogramMin, histogramMax);
+  }
+
+  if (!maxHistogramFilename.empty())
+  {
+    WriteHistogram(maxHistogramFilename.c_str(), maxAccumulatorImage, histogramBinCount, histogramMin, histogramMax);
   }
 
   return EXIT_SUCCESS;

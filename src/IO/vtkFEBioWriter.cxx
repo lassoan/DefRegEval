@@ -59,6 +59,14 @@ vtkFEBioWriter::vtkFEBioWriter()
   this->ArrayNameMaterial=NULL;
   this->SetArrayNameMaterial("material");
 
+  // default values for prostate
+  this->OrganMaterialE=21.0;
+  this->OrganMaterialv=0.45;
+
+  // default values for soft tissue
+  this->SupportMaterialE=11.0;
+  this->SupportMaterialv=0.3;
+
   this->OrganMaterialId=0;
   this->SupportMaterialId=1;
 }
@@ -156,14 +164,14 @@ bool vtkFEBioWriter::WriteMaterial(ostream* fp)
 
   // material id-s are 1-based in the file and 0-based in VTK
   *fp << "  <material id=\"" << this->OrganMaterialId+1 << "\" name=\"OrganTissue\" type=\"linear elastic\">" << vtkstd::endl;
-  *fp << "    <E>21</E>" << vtkstd::endl;
-  *fp << "    <v>0.45</v>" << vtkstd::endl;
+  *fp << "    <E>" << this->OrganMaterialE << "</E>" << vtkstd::endl;  
+  *fp << "    <v>" << this->OrganMaterialv << "</v>" << vtkstd::endl;
   *fp << "  </material>" << vtkstd::endl;
 
   // material id-s are 1-based in the file and 0-based in VTK
   *fp << "  <material id=\"" << this->SupportMaterialId+1 << "\" name=\"SupportTissue\" type=\"linear elastic\">" << vtkstd::endl;
-  *fp << "    <E>11</E>" << vtkstd::endl;
-  *fp << "    <v>0.3</v>" << vtkstd::endl;
+  *fp << "    <E>" << this->SupportMaterialE << "</E>" << vtkstd::endl;
+  *fp << "    <v>" << this->SupportMaterialv << "</v>" << vtkstd::endl;
   *fp << "  </material>" << vtkstd::endl;
 
   *fp << "</Material>" << vtkstd::endl;
