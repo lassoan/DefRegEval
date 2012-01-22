@@ -14,3 +14,19 @@ AnatomicalOrientation tag (such as RAI) in meta files are ignored (they are
 assumed to be LPS)
 
 On Linux, tetgen segfaults if compiled in the Release mode.
+
+___________________
+
+How to cite
+
+If you found this software useful please cite the following paper in your
+related publications.
+
+Andras Lasso, Shachar Avni, and Gabor Fichtinger:
+Targeting Error Simulator for Image-guided Prostate Needle Placement.
+Proc. of 32nd Annual International Conference of the
+IEEE Engineering in Medicine and Biology Society (EMBC2010), pp. 5424-5427.
+Buenos Aires, Argentina, 2010.
+
+Full text of the paper is available here:
+http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3059718/

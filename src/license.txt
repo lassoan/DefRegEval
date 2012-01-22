@@ -8,3 +8,19 @@ Redistribution and use in source and binary forms, with or without modification,
    3. Neither the name of the owner nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+___________________
+
+How to cite
+
+If you found this software useful please cite the following paper in your
+related publications.
+
+Andras Lasso, Shachar Avni, and Gabor Fichtinger:
+Targeting Error Simulator for Image-guided Prostate Needle Placement.
+Proc. of 32nd Annual International Conference of the
+IEEE Engineering in Medicine and Biology Society (EMBC2010), pp. 5424-5427.
+Buenos Aires, Argentina, 2010.
+
+Full text of the paper is available here:
+http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3059718/
